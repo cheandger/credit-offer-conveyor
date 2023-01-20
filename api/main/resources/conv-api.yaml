@@ -42,9 +42,11 @@ paths:
           description: 'Error 400 Bad request'
 
 
-        '422':
-          description: 'Error 422 Unprocessable Entity '
+       '422':
+         description: 'Error 422 UnProcessable Entity'
 
+       '500':
+          description: 'Error 500 internalServerError'
 
 
   /conveyor/calculation:
@@ -70,8 +72,13 @@ paths:
         '400':
           description: 'Error 400 Bad request'
 
+
         '422':
-         description: 'Error 422 Unprocessable Entity '
+           description: 'Error 422 UnProcessable Entity'
+
+        '500':
+           description: 'Error 500 internalServerError'
+
 
 
 
