@@ -85,7 +85,6 @@ public class OffersServiceImpl implements OffersService {
         log.info("Ежемесячный платеж с учетом ануитетного графика погашения составляет " + monthlyPayment);
 
         return new LoanOfferDTO()
-                .applicationId((long) new Random().nextInt())
                 .requestedAmount(loanApplicationRequestDTO.getAmount())
                 .totalAmount(totalAmount)
                 .term(loanApplicationRequestDTO.getTerm())
