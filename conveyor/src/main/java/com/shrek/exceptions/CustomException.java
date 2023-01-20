@@ -28,7 +28,7 @@ public abstract class CustomException extends RuntimeException {
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName()+" {" +
+        return this.getClass().getSimpleName() + " {" +
                 "code=" + code +
                 ", id='" + id + '\'' +
                 ", timestamp=" + timestamp +

@@ -1,4 +1,5 @@
 package com.shrek.controllers;
+
 import com.shrek.controller.OffersServiceApi;
 
 import com.shrek.model.LoanApplicationRequestDTO;
@@ -18,7 +19,7 @@ import java.util.List;
 
 public class OffersServiceController implements OffersServiceApi {
 
-        private final OffersService offersService;
+    private final OffersService offersService;
 
     public OffersServiceController(OffersService offersService) {
 
@@ -26,9 +27,9 @@ public class OffersServiceController implements OffersServiceApi {
     }
 
     @Override
-    public ResponseEntity<List<LoanOfferDTO>> offers (@RequestParam LoanApplicationRequestDTO loanApplicationRequestDTO)  {
+    public ResponseEntity<List<LoanOfferDTO>> offers(@RequestParam LoanApplicationRequestDTO loanApplicationRequestDTO) {
 
         return ResponseEntity.ok(offersService.offers(loanApplicationRequestDTO));
-        }
     }
+}
 

@@ -17,12 +17,7 @@
             <groupId>com.cheandger</groupId>
             <artifactId>api</artifactId>
             <version>0.0.1-SNAPSHOT</version>
-
-
         </dependency>
     </dependencies>
-
-
-
 
 </project>

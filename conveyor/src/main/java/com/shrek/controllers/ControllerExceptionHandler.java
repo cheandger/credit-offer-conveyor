@@ -1,4 +1,5 @@
 package com.shrek.controllers;
+
 import com.shrek.exceptions.BusinessException;
 import com.shrek.exceptions.TechnicalException;
 import org.apache.http.impl.execchain.TunnelRefusedException;
@@ -57,12 +58,12 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
     @NotNull
-    protected  ResponseEntity<Object> handleExceptionInternal(
-           @NotNull Exception ex,
-           @NotNull  Object body,
-           @NotNull HttpHeaders headers,
-           @NotNull  HttpStatus status,
-           @NotNull WebRequest request) {
+    protected ResponseEntity<Object> handleExceptionInternal(
+            @NotNull Exception ex,
+            @NotNull Object body,
+            @NotNull HttpHeaders headers,
+            @NotNull HttpStatus status,
+            @NotNull WebRequest request) {
         log.error("Unhandled REST exception", ex);
         return super.handleExceptionInternal(ex, body, headers, status, request);
     }

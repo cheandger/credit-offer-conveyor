@@ -12,9 +12,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
-
-
-
 @RestController
 @Validated
 
@@ -30,12 +27,12 @@ public class CalculationServiceController implements CalculationServiceApi {
     }
 
 
-@Override
-public ResponseEntity<CreditDTO> calculation(@RequestParam ScoringDataDTO scoringDataDTO)  {
+    @Override
+    public ResponseEntity<CreditDTO> calculation(@RequestParam ScoringDataDTO scoringDataDTO) {
         return ResponseEntity.ok(calculationService.calculation(scoringDataDTO));
-}
-
     }
+
+}
 
 
 
