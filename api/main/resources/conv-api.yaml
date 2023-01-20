@@ -41,7 +41,6 @@ paths:
         '400':
           description: 'Error 400 Bad request'
 
-
        '422':
          description: 'Error 422 UnProcessable Entity'
 
@@ -71,7 +70,6 @@ paths:
 
         '400':
           description: 'Error 400 Bad request'
-
 
         '422':
            description: 'Error 422 UnProcessable Entity'
