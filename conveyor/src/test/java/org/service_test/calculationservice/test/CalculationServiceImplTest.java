@@ -1,13 +1,14 @@
 package org.service_test.calculationservice.test;
 
-import org.service_test.calculationservice.test.scoringdatadtoconfig.ScoringDataDtoInitializer;
-import org.shrek.exceptions.ParametersValidationException;
 import com.shrek.model.EmploymentDTO;
 import com.shrek.model.ScoringDataDTO;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.service_test.calculationservice.test.scoringdatadtoconfig.ScoringDataDtoInitializer;
+import org.shrek.exceptions.*;
 import org.shrek.servises.CalculationService;
 import org.shrek.servises.impl.CalculationServiceImpl;
-import org.junit.jupiter.api.*;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -23,28 +24,10 @@ public class CalculationServiceImplTest {
 
     private final BigDecimal BASE_RATE = BigDecimal.valueOf(27.00).setScale(2, RoundingMode.HALF_UP);
 
-    private final BigDecimal IS_INSURANCE_RATE = BigDecimal.valueOf(3.00).setScale(2, RoundingMode.HALF_UP);
+    private final BigDecimal INSURANCE_RATE_IF_IS_INSURANCE_ENABLED_TRUE = BigDecimal.valueOf(3.00).setScale(2, RoundingMode.HALF_UP);
 
-    CalculationService calculationService = new CalculationServiceImpl();
+    CalculationService calculationService = new CalculationServiceImpl(BASE_RATE, INSURANCE_RATE_IF_IS_INSURANCE_ENABLED_TRUE);
 
-    {
-        ReflectionTestUtils.setField(calculationService, "BASE_RATE", (BigDecimal.valueOf(27.00).setScale(2, RoundingMode.HALF_UP)));
-
-        ReflectionTestUtils.setField(calculationService, "IS_INSURANCE_RATE", (BigDecimal.valueOf(3.00).setScale(2, RoundingMode.HALF_UP)));
-    }
-
-    @Test
-    @DisplayName("Test calculation by Valid EmploymentStatus SELF_EMPLOYED")
-    void validEmploymentStatusSelfEmployedTest() {
-
-        EmploymentDTO validEmploymentDTOStatusSELF_EMPLOYED = ScoringDataDtoInitializer.initialEmploymentDTO(SELF_EMPLOYED, BigDecimal.valueOf(60000), WORKER, 56, 12);
-
-        ScoringDataDTO validEmploymentScoringDataDTOEmploymentStatusSELF_EMPLOYED = ScoringDataDtoInitializer.initialScoringDataDTO(BigDecimal.valueOf(100000), 12, MALE, LocalDate.parse("1985-01-29"), MARRIED, 1,
-                validEmploymentDTOStatusSELF_EMPLOYED, true, true);
-
-        Assertions.assertDoesNotThrow(() ->
-                calculationService.calculation(validEmploymentScoringDataDTOEmploymentStatusSELF_EMPLOYED), "Test passed!");
-    }
 
     @Test
     @DisplayName("Test calculation by NonValid EmploymentStatus Unemployed")
@@ -55,8 +38,11 @@ public class CalculationServiceImplTest {
         ScoringDataDTO UNEMPLOYEDScoringDataDTO = ScoringDataDtoInitializer.initialScoringDataDTO(BigDecimal.valueOf(100000), 12, MALE, LocalDate.parse("1985-01-29"), MARRIED, 1,
                 UNEMPLOYEDEmploymentStatusDTO, true, true);
 
-        Assertions.assertThrows(ParametersValidationException.class, () ->
+        NonValidEmploymentStatusException exception = Assertions.assertThrows(NonValidEmploymentStatusException.class, () ->
                 calculationService.calculation(UNEMPLOYEDScoringDataDTO), "We can't help you. Please find a jod and try again");
+
+        Assertions.assertEquals("The params can't pass the validation: We can't help you. Please find a jod and try again",
+                exception.getMessage());
     }
 
     @Test
@@ -67,9 +53,11 @@ public class CalculationServiceImplTest {
 
         ScoringDataDTO NonValid_LittleSalary_LargeAmount_ScoringDataDTO = ScoringDataDtoInitializer.initialScoringDataDTO(BigDecimal.valueOf(1000000), 12, MALE, LocalDate.parse("1985-01-29"), MARRIED, 1,
                 NonValid_LittleSalary_LargeAmount_EmploymentDTO, true, true);
-//
-        Assertions.assertThrows(ParametersValidationException.class, () ->
-                calculationService.calculation(NonValid_LittleSalary_LargeAmount_ScoringDataDTO), "The sum you are want to loan is too large");
+
+        NonValidAmountSalaryException exception = Assertions.assertThrows(NonValidAmountSalaryException.class, () ->
+                        calculationService.calculation(NonValid_LittleSalary_LargeAmount_ScoringDataDTO),
+                "The sum you are want to loan is too large");
+        Assertions.assertEquals("The params can't pass the validation: The sum you are want to loan is too large", exception.getMessage());
     }
 
     @Test
@@ -80,9 +68,10 @@ public class CalculationServiceImplTest {
 
         ScoringDataDTO NonValid_Age_TooYoung_ScoringDataDTO = ScoringDataDtoInitializer.initialScoringDataDTO(BigDecimal.valueOf(100000), 12, MALE, LocalDate.parse("2005-01-29"), MARRIED, 1,
                 NonValid_Age_TooYoung_EmploymentDTO, true, true);
-//The Age is less than 20 yearsOld
-        Assertions.assertThrows(ParametersValidationException.class, () ->
-                calculationService.calculation(NonValid_Age_TooYoung_ScoringDataDTO), "The Age value is invalid. It should be >20||<60");
+
+        NonValidAgeException exception = Assertions.assertThrows(NonValidAgeException.class, () ->
+                calculationService.calculation(NonValid_Age_TooYoung_ScoringDataDTO), "Non valid age. It should be more than 20 or less than 60 years old");
+        Assertions.assertEquals("The params can't pass the validation: Non valid age. It should be more than 20 or less than 60 years old", exception.getMessage());
     }
 
     @Test
@@ -94,8 +83,10 @@ public class CalculationServiceImplTest {
         ScoringDataDTO NonValid_Age_TooOld_ScoringDataDTO = ScoringDataDtoInitializer.initialScoringDataDTO(BigDecimal.valueOf(100000), 12, MALE, LocalDate.parse("1962-01-29"), MARRIED, 1,
                 NonValid_Age_TooOld_EmploymentDTO, true, true);
 
-        Assertions.assertThrows(ParametersValidationException.class, () ->
-                calculationService.calculation(NonValid_Age_TooOld_ScoringDataDTO), "The Age value is invalid. It should be >20||<60");
+        NonValidAgeException exception = Assertions.assertThrows(NonValidAgeException.class, () ->
+                calculationService.calculation(NonValid_Age_TooOld_ScoringDataDTO), "Non valid age. It should be more than 20 or less than 60 years old");
+
+        Assertions.assertEquals("The params can't pass the validation: Non valid age. It should be more than 20 or less than 60 years old", exception.getMessage());
     }
 
     @Test
@@ -107,8 +98,9 @@ public class CalculationServiceImplTest {
         ScoringDataDTO NonValid_workExperienceTotal_ScoringDataDTO = ScoringDataDtoInitializer.initialScoringDataDTO(BigDecimal.valueOf(100000), 12, MALE, LocalDate.parse("1985-01-29"), MARRIED, 1,
                 NonValid_workExperienceTotal_EmploymentDTO, true, true);
 
-        Assertions.assertThrows(ParametersValidationException.class, () ->
-                calculationService.calculation(NonValid_workExperienceTotal_ScoringDataDTO), "Too little workExperienceTotal. It should be more than 12 month.");
+        NonValidWorkExperienceTotalException exception = Assertions.assertThrows(NonValidWorkExperienceTotalException.class, () ->
+                calculationService.calculation(NonValid_workExperienceTotal_ScoringDataDTO), "Too little workExperienceTotal. It should be more than 12 month");
+        Assertions.assertEquals("The params can't pass the validation: Too little workExperienceTotal. It should be more than 12 month", exception.getMessage());
     }
 
     @Test
@@ -120,13 +112,14 @@ public class CalculationServiceImplTest {
         ScoringDataDTO NonValid_workExperienceCurrent_ScoringDataDTO = ScoringDataDtoInitializer.initialScoringDataDTO(BigDecimal.valueOf(100000), 12, MALE, LocalDate.parse("1985-01-29"), MARRIED, 1,
                 NonValid_workExperienceCurrent_EmploymentDTO, true, true);
 
-        Assertions.assertThrows(ParametersValidationException.class, () ->
-                calculationService.calculation(NonValid_workExperienceCurrent_ScoringDataDTO), "Too little workExperienceCurrent. It should be more than 3 month.");
+        NonValidWorkExperienceCurrentException exception = Assertions.assertThrows(NonValidWorkExperienceCurrentException.class, () ->
+                calculationService.calculation(NonValid_workExperienceCurrent_ScoringDataDTO), "Too little workExperienceCurrent. It should be more than 3 month");
+        Assertions.assertEquals("The params can't pass the validation: Too little workExperienceCurrent. It should be more than 3 month", exception.getMessage());
     }
 
     @Test
     @DisplayName("Test calculation by isInsuranceEnabled true. It'll decrease BaseRate by 3 but increase the fullLoanAmount by (amount*IS_INSURANCE_RATE percents/100) value")
-    void isInsuranceEnabledTrueReducedRateByThreeScoringDTOTest() {
+    void decreaseRateByThreeTotalAmountEvaluateByIsInsuranceEnabledTrueScoringDTOTest() {
 
         EmploymentDTO employmentDTOis_INSURANCE_RATETrue = ScoringDataDtoInitializer.initialEmploymentDTO(EMPLOYED, BigDecimal.valueOf(60000),
                 WORKER, 56, 12);
@@ -135,28 +128,25 @@ public class CalculationServiceImplTest {
                 LocalDate.parse("1999-01-29"), SINGLE, 0,
                 employmentDTOis_INSURANCE_RATETrue, true, false);
 
-        BigDecimal fullLoanAmount = calculationService//Finding FullLoanAmount sum to compare it with expected result
-                .calculation(scoringDataDTOis_INSURANCE_RATETrue).getPaymentSchedule().get(0).getRemainingDebt().
-                add(calculationService
-                        .calculation(scoringDataDTOis_INSURANCE_RATETrue).getPaymentSchedule().get(0).getDebtPayment());
+        BigDecimal fullLoanAmount = calculationService.calculateOfIsInsuranceCaseTotalAmount(scoringDataDTOis_INSURANCE_RATETrue);
 
-        Assertions.assertAll("Check the fullLoanAmount value calculation and the result RATE", () -> {
-                    Assertions.assertEquals(fullLoanAmount,
-
-                            scoringDataDTOis_INSURANCE_RATETrue.getAmount().add((IS_INSURANCE_RATE.multiply(scoringDataDTOis_INSURANCE_RATETrue.getAmount())
-                                    .divide(BigDecimal.valueOf(100), 8, RoundingMode.HALF_UP))
-                                    .divide(BigDecimal.valueOf(12), 8, RoundingMode.HALF_UP)
-                                    .multiply(BigDecimal.valueOf(scoringDataDTOis_INSURANCE_RATETrue.getTerm()))).setScale(2, RoundingMode.HALF_UP));
+        Assertions.assertAll("The values of FullLoanAmount or Rate didn't mach ",
+                () -> {
+                    Assertions.assertEquals(scoringDataDTOis_INSURANCE_RATETrue.getAmount().add(scoringDataDTOis_INSURANCE_RATETrue
+                            .getAmount().multiply(INSURANCE_RATE_IF_IS_INSURANCE_ENABLED_TRUE)
+                            .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP)), fullLoanAmount, "FullLoanAmount values " +
+                            "didn't mach, check the calculation")
+                    ;
                 }
                 , () -> {
-                    Assertions.assertEquals(calculationService.calculation(scoringDataDTOis_INSURANCE_RATETrue).getRate(), BASE_RATE.subtract(BigDecimal.valueOf(3.00)));
-
+                    Assertions.assertEquals(calculationService.evaluateRateByScoring(scoringDataDTOis_INSURANCE_RATETrue), BASE_RATE.subtract(BigDecimal.valueOf(3.00)),
+                            "Rate values didn't mach, check the calculation");
                 });
     }
 
     @Test
     @DisplayName("Test calculation by isInsuranceEnabled false. The rate and the amount will remain unchanged")
-    void isInsuranceEnabledFalseSameRateScoringDTOTest() {
+    void nonEvaluateRateTotalAmountIsInsuranceEnabledFalseScoringDTOTest() {
 
         EmploymentDTO employmentDTOis_INSURANCE_RATEFalse = ScoringDataDtoInitializer.initialEmploymentDTO(EMPLOYED, BigDecimal.valueOf(60000),
                 WORKER, 56, 12);
@@ -175,13 +165,13 @@ public class CalculationServiceImplTest {
                 }
                 , () -> {
                     Assertions.assertEquals(calculationService.calculation(scoringDataDTOis_INSURANCE_RATEFalse).getRate(), BASE_RATE);
-                    //Checking the final rate to compare it with expected rate
+
                 });
     }
 
     @Test
     @DisplayName("Test calculation by isSalary true case. The rate will decrease by 1 and the amount will remain unchanged")
-    void isSalaryTrueRateReducedByOneScoringDTOTest() {
+    void calculateIsSalaryTrueRateReducedByOneScoringDTOTest() {
 
         EmploymentDTO employmentDTOis_Salary_True = ScoringDataDtoInitializer.initialEmploymentDTO(EMPLOYED, BigDecimal.valueOf(60000),
                 WORKER, 56, 12);
@@ -195,7 +185,7 @@ public class CalculationServiceImplTest {
 
     @Test
     @DisplayName("Test calculation by isSalary false case. The rate will remain unchanged")
-    void isSalaryFalseBaseRateScoringDTOTest() {
+    void calculateIsSalaryFalseBaseRateScoringDTOTest() {
 
         EmploymentDTO employmentDTOis_Salary_False = ScoringDataDtoInitializer.initialEmploymentDTO(EMPLOYED, BigDecimal.valueOf(60000),
                 WORKER, 56, 12);
@@ -209,7 +199,7 @@ public class CalculationServiceImplTest {
 
     @Test
     @DisplayName("Test calculation by employmentStatus SELF_EMPLOYED case. The rate will increase by 1")
-    void employmentStatusSelfEmployedRateIncreasedByOneScoringDTOTest() {
+    void calculateIncreaseRateByOneEmploymentStatusSelfEmployedScoringDTOTest() {
 
         EmploymentDTO employmentDTO_EmploymentStatus_SELF_EMPLOYED_Rate_increased_By_One = ScoringDataDtoInitializer.initialEmploymentDTO(SELF_EMPLOYED, BigDecimal.valueOf(60000),
                 WORKER, 56, 12);
@@ -223,7 +213,7 @@ public class CalculationServiceImplTest {
 
     @Test
     @DisplayName("Test calculation by employmentStatus BUSINESS_OWNER case. The rate will increase by 3")
-    void employmentStatusBusinessOwnerRateIncreasedByThreeScoringDTOTest() {
+    void calculateIncreaseRateByThreeEmploymentStatusBusinessOwnerScoringDTOTest() {
 
         EmploymentDTO employmentDTO_EmploymentStatus_BUSSINESS_OWNER_Rate_increased_By_Three = ScoringDataDtoInitializer.initialEmploymentDTO(BUSINESS_OWNER, BigDecimal.valueOf(60000),
                 WORKER, 56, 12);
@@ -238,7 +228,7 @@ public class CalculationServiceImplTest {
 
     @Test
     @DisplayName("Test calculation by employmentStatus MID_MANAGER case. The rate will decrease by 2")
-    void employmentGetPositionMidManagerRateSubtractByTwoScoringDTOTest() {
+    void calculateEmploymentGetPositionMidManagerRateDecreaseByTwoScoringDTOTest() {
 
         EmploymentDTO employmentDTO_GetPosition_MID_MANAGER_Rate_subtract_By_Two = ScoringDataDtoInitializer.initialEmploymentDTO(EMPLOYED, BigDecimal.valueOf(60000),
                 MID_MANAGER, 56, 12);
@@ -252,7 +242,7 @@ public class CalculationServiceImplTest {
 
     @Test
     @DisplayName("Test calculation by employmentStatus TOP_MANAGER case. The rate will decrease by 4")
-    void employmentTopManagerRateSubtractByFourScoringDTOTest() {
+    void calculateEmploymentTopManagerRateDecreaseByFourScoringDTOTest() {
 
         EmploymentDTO employmentDTO_GetPosition_TOP_MANAGER_Rate_subtract_By_Four = ScoringDataDtoInitializer.initialEmploymentDTO(EMPLOYED, BigDecimal.valueOf(60000),
                 TOP_MANAGER, 56, 12);
@@ -267,7 +257,7 @@ public class CalculationServiceImplTest {
 
     @Test
     @DisplayName("Test calculation by maritalStatus MARRIED case. The rate will decrease by 3")
-    void maritalStatusMarriedRateSubtractByThreeScoringDTOTest() {
+    void calculateMaritalStatusMarriedRateSubtractByThreeScoringDTOTest() {
 
         EmploymentDTO employmentDTO_MaritalStatus_MARRIED_Rate_subtract_By_Three = ScoringDataDtoInitializer.initialEmploymentDTO(EMPLOYED, BigDecimal.valueOf(60000),
                 WORKER, 56, 12);
@@ -282,7 +272,7 @@ public class CalculationServiceImplTest {
 
     @Test
     @DisplayName("Test calculation by maritalStatus DIVORCED case. The rate will increase by 1")
-    void maritalStatusDivorcedRateIncreasedByOneScoringDTOTest() {
+    void calculateMaritalStatusDivorcedRateIncreasedByOneScoringDTOTest() {
 
         EmploymentDTO employmentDTO_MaritalStatus_DIVORCED_Rate_increased_By_One = ScoringDataDtoInitializer.initialEmploymentDTO(EMPLOYED, BigDecimal.valueOf(60000),
                 WORKER, 56, 12);
@@ -296,7 +286,7 @@ public class CalculationServiceImplTest {
 
     @Test
     @DisplayName("Test calculation by maritalStatus WIDOW_WIDOWER case. The rate will remain unchanged")
-    void maritalStatusWidowWidowerSameRateScoringDTOTest() {
+    void calculateMaritalStatusWidowWidowerSameRateScoringDTOTest() {
 
         EmploymentDTO employmentDTO_MaritalStatus_WIDOW_WIDOWER_Same_Rate = ScoringDataDtoInitializer.initialEmploymentDTO(EMPLOYED, BigDecimal.valueOf(60000),
                 WORKER, 56, 12);
@@ -324,7 +314,7 @@ public class CalculationServiceImplTest {
 
     @Test
     @DisplayName("Test calculation by FEMALE age less than Sixty & more than ThirtyFive case. The rate will decrease by 3")
-    void genderFemaleAgeLessSixtyMoreThirtyFiveSubtractRatebyThreeScoringDTOTest() {
+    void getGenderFemaleAgeLessSixtyMoreThirtyFiveSubtractRateByThreeScoringDTOTest() {
 
         EmploymentDTO employmentDTO_gender_FEMALE_Age_Less_Sixty_More_ThirtyFive_subtract_Rate_by_Three = ScoringDataDtoInitializer.initialEmploymentDTO(EMPLOYED, BigDecimal.valueOf(60000),
                 WORKER, 56, 12);
@@ -338,7 +328,7 @@ public class CalculationServiceImplTest {
 
     @Test
     @DisplayName("Test calculation by FEMALE age less than ThirtyFive case. The rate will remain unchanged")
-    void gender_FEMALE_Age_Less_ThirtyFive_BASE_Rate_ScoringDTOTest() {
+    void getGender_FEMALE_Age_Less_ThirtyFive_BASE_Rate_ScoringDTOTest() {
 
         EmploymentDTO employmentDTO_gender_FEMALE_Age_Less_ThirtyFive_BASE_Rate = ScoringDataDtoInitializer.initialEmploymentDTO(EMPLOYED, BigDecimal.valueOf(60000),
                 WORKER, 56, 12);
@@ -352,7 +342,7 @@ public class CalculationServiceImplTest {
 
     @Test
     @DisplayName("Test calculation by MALE age less than Thirty case. The rate will remain unchanged")
-    void genderMaleAgeLessThirtyBASERateScoringDTOTest() {
+    void getGenderMaleAgeLessThirtyBASERateScoringDTOTest() {
 
         EmploymentDTO employmentDTO_gender_MALE_Age_Less_Thirty_BASE_Rate = ScoringDataDtoInitializer.initialEmploymentDTO(EMPLOYED, BigDecimal.valueOf(60000),
                 WORKER, 56, 12);
@@ -366,7 +356,7 @@ public class CalculationServiceImplTest {
 
     @Test
     @DisplayName("Test calculation by MALE age less than FiftyFive more than Thirty case. The rate will decrease by 3")
-    void genderMailAgeLessFiftyFiveMoreThirtySubtractRateByThreeScoringDTOTest() {
+    void getGenderMailAgeLessFiftyFiveMoreThirtySubtractRateByThreeScoringDTOTest() {
 
         EmploymentDTO employmentDTO_gender_MALE_Age_Less_FiftyFive_More_Thirty_subtract_Rate_by_Three = ScoringDataDtoInitializer.initialEmploymentDTO(EMPLOYED, BigDecimal.valueOf(60000),
                 WORKER, 56, 12);
@@ -380,7 +370,7 @@ public class CalculationServiceImplTest {
 
     @Test
     @DisplayName("Test calculation by MALE age  more than FiftyFive case. The rate will remain unchanged")
-    void genderMaleAgeMoreFiftyFiveBASERateScoringDTOTest() {
+    void getGenderMaleAgeMoreFiftyFiveBASERateScoringDTOTest() {
 
         EmploymentDTO employmentDTO_gender_MALE_Age_More_FiftyFive_BASE_Rate = ScoringDataDtoInitializer.initialEmploymentDTO(EMPLOYED, BigDecimal.valueOf(60000),
                 WORKER, 56, 12);
@@ -394,7 +384,7 @@ public class CalculationServiceImplTest {
 
     @Test
     @DisplayName("Test calculation by gender NON BINARY case. The rate will increase by 3")
-    void genderNonBinaryIncreaseRateByThreeScoringDTOTest() {
+    void getGenderNonBinaryIncreaseRateByThreeScoringDTOTest() {
 
         EmploymentDTO employmentDTO_gender_NON_BINARY_Increase_Rate_By_Three = ScoringDataDtoInitializer.initialEmploymentDTO(EMPLOYED, BigDecimal.valueOf(60000),
                 WORKER, 56, 12);

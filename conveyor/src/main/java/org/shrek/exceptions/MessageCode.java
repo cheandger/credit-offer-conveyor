@@ -1,7 +1,5 @@
 package org.shrek.exceptions;
 
 public final class MessageCode {
-    public static final int VALIDATION_EXCEPTION = 100000;
-    public static final int INCORRECT_DATA_RANGE = 100001;
-
+    public static final int VALIDATION_EXCEPTION = 1000001;
 }

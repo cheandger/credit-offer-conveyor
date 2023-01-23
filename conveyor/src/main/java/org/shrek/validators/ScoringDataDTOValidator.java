@@ -3,7 +3,6 @@ package org.shrek.validators;
 
 import com.shrek.model.EmploymentDTO;
 import com.shrek.model.ScoringDataDTO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
@@ -44,19 +43,19 @@ public class ScoringDataDTOValidator implements Validator {
         Integer workExperienceCurrent = employmentDTO.getWorkExperienceCurrent();
 
         if (employmentStatus.equals(String.valueOf(UNEMPLOYED))) {
-            errors.reject("employmentStatus", "We can't help you. Please find a jod and try again");
+            errors.reject("nonValidEmployedStatus", "We can't help you. Please find a jod and try again");
         }
         if (amount.compareTo(salary.multiply(BigDecimal.valueOf(20))) > 0) {
-            errors.reject("amount,salary", "The sum you are want to loan is too large");
+            errors.reject("nonValidAmountSalary", "The sum you are want to loan is too large");
         }
         if ((LocalDate.now().getYear() - birthdate.getYear()) > 60 || (LocalDate.now().getYear() - birthdate.getYear()) < 20) {
-            errors.reject("age", "Wrong age. It should be >20&<60");
+            errors.reject("nonValidAge", "Non valid age. It should be more than 20 or less than 60 years old");
         }
         if (workExperienceTotal < 12) {
-            errors.reject("workExperienceTotal", "Too little workExperienceTotal");
+            errors.reject("nonValidWorkExperienceTotal", "Too little workExperienceTotal. It should be more than 12 month");
         }
         if (workExperienceCurrent < 3) {
-            errors.reject("workExperienceCurrent", "Too little workExperienceCurrent");
+            errors.reject("nonValidWorkExperienceCurrent", "Too little workExperienceCurrent. It should be more than 3 month");
         }
     }
 }
