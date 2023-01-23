@@ -71,8 +71,7 @@ public class CalculationServiceImpl implements CalculationService {
                 case "nonValidWorkExperienceCurrent":
                     throw new NonValidWorkExperienceCurrentException(objectError.getDefaultMessage());
 
-            }
-            ;
+            };
             log.info("Проверка валидности входных данных");
         }
 
