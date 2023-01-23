@@ -1,7 +1,6 @@
 package org.shrek.controllers;
 
 import com.shrek.controller.CalculationServiceApi;
-
 import com.shrek.model.CreditDTO;
 import com.shrek.model.ScoringDataDTO;
 import org.shrek.servises.CalculationService;
@@ -22,8 +21,8 @@ public class CalculationServiceController implements CalculationServiceApi {
     }
 
     @Override
-    public ResponseEntity<CreditDTO> calculation(@RequestParam ScoringDataDTO scoringDataDTO) {
-        return ResponseEntity.ok(calculationService.calculation(scoringDataDTO));
+    public ResponseEntity<CreditDTO> calculate(@RequestParam ScoringDataDTO scoringDataDTO) {
+        return ResponseEntity.ok(calculationService.calculate(scoringDataDTO));
     }
 }
 

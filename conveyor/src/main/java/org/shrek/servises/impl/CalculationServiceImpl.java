@@ -48,7 +48,7 @@ public class CalculationServiceImpl implements CalculationService {
 
     @Override
 
-    public CreditDTO calculation(ScoringDataDTO scoringDataDTO) throws ParametersValidationException {
+    public CreditDTO calculate(ScoringDataDTO scoringDataDTO) throws ParametersValidationException {
 
         DataBinder dataBinder = new DataBinder(scoringDataDTO);
         dataBinder.addValidators(new ScoringDataDTOValidator());
@@ -174,7 +174,7 @@ public class CalculationServiceImpl implements CalculationService {
                 .term(scoringDataDTO.getTerm())
                 .monthlyPayment(monthlyPayment)
                 .rate(finalRate)
-                .psk(calculationOfPsk(finalTotalAmount.doubleValue(), scheduleList))
+                .psk(calculatePsk(finalTotalAmount.doubleValue(), scheduleList))
                 .isInsuranceEnabled(scoringDataDTO.getIsInsuranceEnabled())
                 .isSalaryClient(scoringDataDTO.getIsSalaryClient())
                 .paymentSchedule(scheduleList);
@@ -198,7 +198,7 @@ public class CalculationServiceImpl implements CalculationService {
     }
 
     @Override
-    public BigDecimal calculationOfPsk(Double amount, List<PaymentScheduleElement> paymentScheduleElementList) {
+    public BigDecimal calculatePsk(Double amount, List<PaymentScheduleElement> paymentScheduleElementList) {
         log.info("Расчет ПСК");
 
         /*
@@ -337,11 +337,7 @@ public class CalculationServiceImpl implements CalculationService {
         return preEvalRate;
     }
 
-    /*public static boolean isScoringDataDTORateDecreaseByThreeBecauseOfGenderAge(ScoringDataDTO scoringDataDTO) {
-        return (scoringDataDTO.getGender().equals(MALE) && (LocalDate.now().getYear() - scoringDataDTO.getBirthdate().getYear()) < 55
-                && (LocalDate.now().getYear() - scoringDataDTO.getBirthdate().getYear()) > 30) || (scoringDataDTO.getGender()
-                .equals(FEMALE) && (LocalDate.now().getYear() - scoringDataDTO.getBirthdate().getYear()) < 60 &&
-                ((LocalDate.now().getYear() - scoringDataDTO.getBirthdate().getYear()) > 35));*/
+
 }
 
 

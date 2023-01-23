@@ -1,4 +1,5 @@
 package org.shrek.controllers;
+
 import org.shrek.exceptions.BusinessException;
 import org.shrek.exceptions.TechnicalException;
 import org.slf4j.Logger;
@@ -53,15 +54,14 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.unprocessableEntity().body(ex.toString());
     }
 
-
     @Override
     @NotNull
-    protected  ResponseEntity<Object> handleExceptionInternal(
-           @NotNull Exception ex,
-           @NotNull  Object body,
-           @NotNull HttpHeaders headers,
-           @NotNull  HttpStatus status,
-           @NotNull WebRequest request) {
+    protected ResponseEntity<Object> handleExceptionInternal(
+            @NotNull Exception ex,
+            @NotNull Object body,
+            @NotNull HttpHeaders headers,
+            @NotNull HttpStatus status,
+            @NotNull WebRequest request) {
         log.error("Unhandled REST exception", ex);
         return super.handleExceptionInternal(ex, body, headers, status, request);
     }

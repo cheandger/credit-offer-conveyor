@@ -40,7 +40,7 @@ public class OffersServiceImpl implements OffersService {
     }
 
     @Override
-    public List<LoanOfferDTO> offers(LoanApplicationRequestDTO loanApplicationRequestDTO) throws ParametersValidationException {
+    public List<LoanOfferDTO> createOffers(LoanApplicationRequestDTO loanApplicationRequestDTO) throws ParametersValidationException {
 
         DataBinder dataBinder = new DataBinder(loanApplicationRequestDTO);
         dataBinder.addValidators(new LoanApplicationRequestDTOValidator());

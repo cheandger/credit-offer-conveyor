@@ -10,11 +10,11 @@ import java.util.List;
 
 public interface CalculationService {
 
-    CreditDTO calculation(ScoringDataDTO scoringDataDTO);
+    CreditDTO calculate(ScoringDataDTO scoringDataDTO);
 
     BigDecimal calculateOfIsInsuranceCaseTotalAmount(ScoringDataDTO scoringDataDTO);
 
-    BigDecimal calculationOfPsk(Double amount, List<PaymentScheduleElement> paymentScheduleElementList);
+    BigDecimal calculatePsk(Double amount, List<PaymentScheduleElement> paymentScheduleElementList);
 
     BigDecimal evaluateRateByScoring(ScoringDataDTO scoringDataDTO);
 }

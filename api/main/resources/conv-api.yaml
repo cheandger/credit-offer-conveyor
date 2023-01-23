@@ -16,7 +16,7 @@ paths:
       tags:
         - OffersService
       summary: The LoanOfferVariations calculation
-      operationId: offers
+      operationId: createOffers
 
 
       requestBody:
@@ -54,7 +54,7 @@ paths:
       tags:
         - CalculationService
       summary: Creating CreditDTO
-      operationId: calculation
+      operationId: calculate
       requestBody:
         required: true
         content:

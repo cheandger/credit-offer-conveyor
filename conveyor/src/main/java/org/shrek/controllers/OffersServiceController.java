@@ -6,7 +6,8 @@ import com.shrek.model.LoanOfferDTO;
 import org.shrek.servises.OffersService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -22,8 +23,8 @@ public class OffersServiceController implements OffersServiceApi {
     }
 
     @Override
-    public ResponseEntity<List<LoanOfferDTO>> offers(@RequestParam LoanApplicationRequestDTO loanApplicationRequestDTO) {
-        return ResponseEntity.ok(offersService.offers(loanApplicationRequestDTO));
+    public ResponseEntity<List<LoanOfferDTO>> createOffers(@RequestParam LoanApplicationRequestDTO loanApplicationRequestDTO) {
+        return ResponseEntity.ok(offersService.createOffers(loanApplicationRequestDTO));
     }
 }
 
