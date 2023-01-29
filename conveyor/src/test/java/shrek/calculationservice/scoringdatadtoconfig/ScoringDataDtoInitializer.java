@@ -1,4 +1,4 @@
-package org.service_test.calculationservice.test.scoringdatadtoconfig;
+package org.shrek.calculationservice.scoringdatadtoconfig;
 
 import com.shrek.model.EmploymentDTO;
 import com.shrek.model.ScoringDataDTO;
@@ -25,7 +25,7 @@ public class ScoringDataDtoInitializer {
                 .passportSeries("2355")
                 .passportNumber("564836")
                 .passportIssueDate(LocalDate.of(2005, 5, 5))
-                .passportIssueBranch("Воронеж")
+                .passportIssueBranch("Центральным РОВД г.Воронеж")
                 .maritalStatus(maritalStatus)
                 .dependentAmount(dependentAmount)
                 .employment(employmentDTO)

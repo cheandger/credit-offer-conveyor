@@ -2,39 +2,38 @@ package org.shrek.servises.impl;
 
 import com.shrek.model.LoanApplicationRequestDTO;
 import com.shrek.model.LoanOfferDTO;
-import org.shrek.exceptions.NonValidAgePreScoringException;
 import org.shrek.exceptions.ParametersValidationException;
 import org.shrek.servises.OffersService;
 import org.shrek.validators.LoanApplicationRequestDTOValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.DataBinder;
 import org.springframework.validation.ObjectError;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import static org.shrek.util.CalculationUtil.calculateIsInsuranceCaseTotalAmount;
+import static org.shrek.util.CalculationUtil.calculateMonthlyPayment;
+
 @Service
-@PropertySource("config_properties.properties")
 
 public class OffersServiceImpl implements OffersService {
 
+    private static final Logger log = LoggerFactory.getLogger(OffersServiceImpl.class);
 
     private final BigDecimal BASE_RATE;
     private final BigDecimal INSURANCE_RATE_IF_IS_INSURANCE_ENABLED_TRUE;
 
-    private static final Logger log = LoggerFactory.getLogger(OffersServiceImpl.class);
-
     public OffersServiceImpl(@Value("${BASE_RATE}") BigDecimal BASE_RATE,
                              @Value("${INSURANCE_RATE_IF_IS_INSURANCE_ENABLED_TRUE}") BigDecimal INSURANCE_RATE_IF_IS_INSURANCE_ENABLED_TRUE) {
+
         this.BASE_RATE = BASE_RATE;
         this.INSURANCE_RATE_IF_IS_INSURANCE_ENABLED_TRUE = INSURANCE_RATE_IF_IS_INSURANCE_ENABLED_TRUE;
     }
@@ -48,7 +47,7 @@ public class OffersServiceImpl implements OffersService {
         if (dataBinder.getBindingResult().hasErrors()) {
             ObjectError objectError = dataBinder.getBindingResult().getAllErrors().get(0);
             log.info("Проверка валидности входных данных");
-            throw new NonValidAgePreScoringException(objectError.getDefaultMessage());
+            throw new ParametersValidationException(objectError.getDefaultMessage());
         }
 
         List<LoanOfferDTO> loanOfferDTOList = new ArrayList<>();
@@ -65,56 +64,31 @@ public class OffersServiceImpl implements OffersService {
 
         log.info("Список возможных вариантов кредитных предложений " + loanOfferDTOList);
         return loanOfferDTOList;
-
     }
 
     @Override
-    public LoanOfferDTO createLoanOffer(@NotNull LoanApplicationRequestDTO loanApplicationRequestDTO, @NotNull Boolean isInsuranceEnabled, @NotNull Boolean isSalaryClient) {
+    public LoanOfferDTO createLoanOffer(@NotNull LoanApplicationRequestDTO loanApplicationRequestDTO,
+                                        @NotNull Boolean isInsuranceEnabled, @NotNull Boolean isSalaryClient) {
 
-        BigDecimal totalAmount = loanApplicationRequestDTO.getAmount();
+        BigDecimal totalAmount = calculateIsInsuranceCaseTotalAmount(loanApplicationRequestDTO.getAmount(),
+                isInsuranceEnabled, loanApplicationRequestDTO.getTerm(), INSURANCE_RATE_IF_IS_INSURANCE_ENABLED_TRUE);
 
-        if (isInsuranceEnabled) {
-            totalAmount = totalAmount.add(INSURANCE_RATE_IF_IS_INSURANCE_ENABLED_TRUE.multiply(totalAmount).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP));
-        }
         log.info("Расчет актуального размера тела кредита");
 
-        BigDecimal finalRate = changeRateByIsInsuranceEnabledOrIsSalaryClient(isInsuranceEnabled, isSalaryClient);
+        BigDecimal finalRate = BASE_RATE;
+
+        if (isSalaryClient) {
+            finalRate = finalRate.subtract(BigDecimal.valueOf(1));
+        }
+        if (isInsuranceEnabled) {
+            finalRate = finalRate.subtract(BigDecimal.valueOf(3));
+        }
+
         log.info("Завершен расчет актуального размера кредитной ставки: " + finalRate + " % ");
 
+        BigDecimal monthlyPayment = calculateMonthlyPayment(loanApplicationRequestDTO.getAmount(),
+                loanApplicationRequestDTO.getTerm(), finalRate);
 
-         /*
-        Расчет ежемесячного платежа производится по формуле:
-
-                    x=S*(P+P/((1+P)^N)-1)
-          где:
-          S — сумма займа
-          P — 1/100 доля процентной ставки (в месяц)
-          N — срок кредитования (в месяцах)
-
-           Доля процентов (I) в ежемесячном взносе вычисляется по формуле:
-
-                    I=S*P
-         где:
-          S — остаточный объем средств
-          P — упомянутая ранее процентная ставка
-
-         */
-        log.info("Расчет сотой доли месячной ставки ");
-        BigDecimal aHundredthPartOfMonthlyRate = finalRate.divide(BigDecimal.valueOf(100), 6, RoundingMode.HALF_UP)
-                .divide(BigDecimal.valueOf(12), 8, RoundingMode.HALF_UP).setScale(6, RoundingMode.HALF_UP);
-        log.info("Сотая доля месячной ставки составляет  " + aHundredthPartOfMonthlyRate
-                .multiply(BigDecimal.valueOf(100)).setScale(4, RoundingMode.HALF_UP));
-
-
-        log.info("Расчет ежемесячного платежа ");
-        BigDecimal monthlyPayment = totalAmount.multiply((aHundredthPartOfMonthlyRate
-                .add((aHundredthPartOfMonthlyRate
-                        .divide(((BigDecimal.valueOf(1)
-                                .add(aHundredthPartOfMonthlyRate))
-                                .pow(loanApplicationRequestDTO.getTerm()))
-                                .subtract(BigDecimal.valueOf(1)), 6, RoundingMode.HALF_UP))))).setScale(2, RoundingMode.HALF_UP);
-
-        log.info("Ежемесячный платеж с учетом ануитетного графика погашения составляет " + monthlyPayment);
 
         return new LoanOfferDTO()
                 .requestedAmount(loanApplicationRequestDTO.getAmount())
@@ -126,19 +100,7 @@ public class OffersServiceImpl implements OffersService {
                 .isSalaryClient(isSalaryClient);
     }
 
-    @Override
-    public BigDecimal changeRateByIsInsuranceEnabledOrIsSalaryClient(@NotNull Boolean isInsuranceEnabled, @NotNull Boolean isSalaryClient) {
 
-        BigDecimal finalRate = BASE_RATE;
-
-        if (isSalaryClient) {
-            finalRate = finalRate.subtract(BigDecimal.valueOf(1));
-        }
-        if (isInsuranceEnabled) {
-            finalRate = finalRate.subtract(BigDecimal.valueOf(3));
-        }
-        return finalRate;
-    }
 }
 
 
