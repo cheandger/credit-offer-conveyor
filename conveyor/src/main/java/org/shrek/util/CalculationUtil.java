@@ -22,7 +22,7 @@ import static com.shrek.model.ScoringDataDTO.MaritalStatusEnum.MARRIED;
 import static java.time.Duration.between;
 
 @Component
-@PropertySource("credit-offer-conveyor/conveyor/src/main/resources/config_properties.yaml")
+
 public class CalculationUtil {
 
     private static final Logger log = LoggerFactory.getLogger(CalculationUtil.class);
