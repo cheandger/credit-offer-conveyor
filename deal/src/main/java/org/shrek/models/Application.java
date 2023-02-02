@@ -39,7 +39,7 @@ public class Application {
     private LocalDateTime creationDate;
 
     @Type(type = "jsonb")
-    @JdbcTypeCode(SqlTypes.JSON)
+    @JdbcTypeCode(SqlTypes.JSON)???
     private LoanOfferDTO appliedOffer;
     @Column(name = "sign_date")
     private LocalDate signDate;
