@@ -1,4 +1,4 @@
-package org.shrek.servises;
+package org.shrek.services;
 
 
 import com.shrek.model.CreditDTO;

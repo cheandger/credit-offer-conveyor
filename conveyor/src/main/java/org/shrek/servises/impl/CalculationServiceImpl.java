@@ -1,10 +1,10 @@
-package org.shrek.servises.impl;
+package org.shrek.services.impl;
 
 import com.shrek.model.CreditDTO;
 import com.shrek.model.PaymentScheduleElement;
 import com.shrek.model.ScoringDataDTO;
 import org.shrek.exceptions.ParametersValidationException;
-import org.shrek.servises.CalculationService;
+import org.shrek.services.CalculationService;
 import org.shrek.validators.ScoringDataDTOValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

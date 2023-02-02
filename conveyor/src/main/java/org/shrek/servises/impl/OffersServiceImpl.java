@@ -1,9 +1,9 @@
-package org.shrek.servises.impl;
+package org.shrek.services.impl;
 
 import com.shrek.model.LoanApplicationRequestDTO;
 import com.shrek.model.LoanOfferDTO;
 import org.shrek.exceptions.ParametersValidationException;
-import org.shrek.servises.OffersService;
+import org.shrek.services.OffersService;
 import org.shrek.validators.LoanApplicationRequestDTOValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

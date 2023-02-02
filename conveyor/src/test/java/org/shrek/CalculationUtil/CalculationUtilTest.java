@@ -7,8 +7,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.shrek.calculationservice.scoringdatadtoconfig.ScoringDataDtoInitializer;
-import org.shrek.servises.CalculationService;
-import org.shrek.servises.impl.CalculationServiceImpl;
+import org.shrek.services.CalculationService;
+import org.shrek.services.impl.CalculationServiceImpl;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
