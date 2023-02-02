@@ -1,0 +1,67 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="111 (generated)" id="1675194548497-1">
+        <createTable tableName="client">
+            <column autoIncrement="true" name="client_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="client_pkey"/>
+            </column>
+            <column name="last_name" type="VARCHAR(30)"/>
+            <column name="first_name" type="VARCHAR(30)"/>
+            <column name="middle_name" type="VARCHAR(30)"/>
+            <column name="birth_date" type="date"/>
+            <column name="email" type="VARCHAR(150)"/>
+            <column name="gender" type="VARCHAR"/>
+            <column name="marital_status" type="VARCHAR"/>
+            <column name="dependent_amount" type="INTEGER"/>
+            <column name="passport_info" type="JSONB"/>
+            <column name="employment_info" type="JSONB"/>
+            <column name="account" type="VARCHAR"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="111 (generated)" id="1675194548497-2">
+        <createTable tableName="credit">
+            <column autoIncrement="true" name="credit_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="credit_pkey"/>
+            </column>
+            <column name="amount" type="numeric"/>
+            <column name="term" type="INTEGER"/>
+            <column name="monthly_payment" type="numeric"/>
+            <column name="rate" type="numeric"/>
+            <column name="psk" type="numeric"/>
+            <column name="payment_schedule" type="JSONB"/>
+            <column name="insurance_enabled" type="BOOLEAN"/>
+            <column name="salary_client" type="BOOLEAN"/>
+            <column name="credit_status" type="VARCHAR"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="111 (generated)" id="1675194548497-3">
+        <createTable tableName="application">
+            <column autoIncrement="true" name="application_id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="application_pkey"/>
+            </column>
+            <column name="client_id" type="BIGINT"/>
+            <column name="credit_id" type="BIGINT"/>
+            <column name="status" type="VARCHAR"/>
+            <column name="creation_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="applied_offer" type="JSONB"/>
+            <column name="sign_date" type="TIMESTAMP WITHOUT TIME ZONE"/>
+            <column name="ses_code" type="BIGINT"/>
+            <column name="status_history" type="JSONB"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="111 (generated)" id="1675194548497-4">
+        <addForeignKeyConstraint baseColumnNames="client_id" baseTableName="application"
+                                 constraintName="application_client_id_fkey" deferrable="false"
+                                 initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+                                 referencedColumnNames="client_id" referencedTableName="client" validate="true"/>
+    </changeSet>
+    <changeSet author="111 (generated)" id="1675194548497-5">
+        <addForeignKeyConstraint baseColumnNames="credit_id" baseTableName="application"
+                                 constraintName="application_credit_id_fkey" deferrable="false"
+                                 initiallyDeferred="false" onDelete="CASCADE" onUpdate="CASCADE"
+                                 referencedColumnNames="credit_id" referencedTableName="credit" validate="true"/>
+    </changeSet>
+</databaseChangeLog>
