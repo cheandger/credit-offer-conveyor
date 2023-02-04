@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  title: Conveyor
+  title: dealConveyor
   version: 0.0.1
 servers:
   - url: http://localhost:8080
@@ -9,6 +9,14 @@ tags:
     description: The LoanOfferVariations calculation
   - name: CalculationService
     description: The calculation of loan variations
+  - name: DealService
+    description: Create Client, retuns offers, post to conveyor
+  - name: DealDocumentService
+    description: Send, Sign, request the docs
+  - name: ApplicationService
+    description: Loanoffer list creation
+  - name: ApplicationOfferService
+    description: Choosing loan offer
 
 paths:
   /conveyor/offers:
@@ -37,7 +45,6 @@ paths:
                 items:
                   $ref: '#/components/schemas/LoanOfferDTO'
 
-
         '400':
           description: 'Error 400 Bad request'
 
@@ -47,7 +54,6 @@ paths:
 
         '500':
           description: 'Error 500 internalServerError'
-
 
   /conveyor/calculation:
     post:
@@ -68,10 +74,38 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CreditDTO'
+        '400':
+          description: 'Error 400 Bad request'
+        '422':
+          description: 'Error 422 UnProcessable Entity'
+        '500':
+          description: 'Error 500 internalServerError'
+
+  /deal/application:
+    post:
+      tags:
+        - DealService
+      summary: Create the Client entity save to BD
+      operationId: createListOffersByFeignClient
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanApplicationRequestDTO'
+
+      responses:
+        '200':
+          description: 'Ok. Successful offer response'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LoanOfferDTO'
 
         '400':
           description: 'Error 400 Bad request'
-
 
         '422':
           description: 'Error 422 UnProcessable Entity'
@@ -79,12 +113,175 @@ paths:
         '500':
           description: 'Error 500 internalServerError'
 
+  /deal/offer:
+    put:
+      tags:
+        - DealService
+      summary: Offer selection
+      operationId: getAppChangeStatus
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanOfferDTO'
 
+      responses:
+        '200':
+          description: 'Ok. The status history is changed'
+        '400':
+          description: 'Error 400 Bad request'
+        '422':
+          description: 'Error 422 UnProcessable Entity'
+        '500':
+          description: 'Error 500 internalServerError'
 
+  /deal/calculate/{applicationId}:
+    parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+    put:
+      tags:
+        - DealService
+      summary: Credit product calculation
+      operationId: formScoringData
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FinishRegistrationRequestDTO'
+      responses:
+        '200':
+          description: 'Ok. The ScoringDataDTO is filled with data'
+
+        '400':
+          description: 'Error 400 Bad request'
+
+        '422':
+          description: 'Error 422 UnProcessable Entity'
+
+        '500':
+          description: 'Error 500 internalServerError'
+
+  /deal/document/{applicationId}/send:
+    parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+    post:
+      tags:
+        - DealDocumentService
+      summary: Request to send documents
+      operationId: sendDocuments
+      responses:
+        '200':
+          description: 'Request sent'
+        '400':
+          description: 'Error 400 Bad request'
+
+        '422':
+          description: 'Error 422 UnProcessable Entity'
+
+        '500':
+          description: 'Error 500 internalServerError'
+
+  /deal/document/{applicationId}/sign:
+    parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+    post:
+      tags:
+        - DealDocumentService
+      summary: Request to sign documents
+      operationId: signDocuments
+      responses:
+        '200':
+          description: 'Request sent for signing'
+        '400':
+          description: 'Error 400 Bad request'
+        '422':
+          description: 'Error 422 UnProcessable Entity'
+        '500':
+          description: 'Error 500 internalServerError'
+
+  /deal/document/{applicationId}/code:
+    parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+    post:
+      tags:
+        - DealDocumentService
+      summary: Documents signing
+      operationId: sendCode
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: 'Documents signed'
+        '400':
+          description: 'Error 400 Bad request'
+        '422':
+          description: 'Error 422 UnProcessable Entity'
+        '500':
+          description: 'Error 500 internalServerError'
+
+  /application:
+    post:
+      tags:
+        - ApplicationService
+      summary: Calculation of possible loan offers
+      operationId: getListOfPossibleLoanOffers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanApplicationRequestDTO'
+      responses:
+        '200':
+          description: 'The list of LoanOfferDTO successfully created'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LoanOfferDTO'
+        '400':
+          description: 'Error 400 Bad request'
+        '422':
+          description: 'Error 422 UnProcessable Entity'
+        '500':
+          description: 'Error 500 internalServerError'
+
+  /application/offer:
+    put:
+      tags:
+        - ApplicationOfferService
+      summary: Offer selection
+      operationId: choiceLoanOffer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanOfferDTO'
+      responses:
+        200:
+          description: Offer selection for calculation
+        '400':
+          description: 'Error 400 Bad request'
+        '422':
+          description: 'Error 422 UnProcessable Entity'
+        '500':
+          description: 'Error 500 internalServerError'
 
 
 
 components:
+  parameters:
+    ApplicationId:
+      name: applicationId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+
   schemas:
 
     LoanOfferDTO:
@@ -92,7 +289,7 @@ components:
       type: object
       properties:
         applicationId:
-          description: "LoanOfferDTO different Id"
+          description: "Different Id"
           type: integer
           format: int64
         requestedAmount:
@@ -332,8 +529,6 @@ components:
           type: integer
 
 
-
-
     PaymentScheduleElement:
       type: object
       properties:
@@ -357,6 +552,178 @@ components:
           type: number
         remainingDebt:
           type: number
+
+    FinishRegistrationRequestDTO:
+      type: object
+      properties:
+        gender:
+          description: "Client's gender"
+          type: string
+          enum:
+            - MALE
+            - FEMALE
+            - NON_BINARY
+        maritalStatus:
+          description: "Client's marital status"
+          type: string
+          enum:
+            - MARRIED
+            - DIVORCED
+            - SINGLE
+            - WIDOW_WIDOWER
+        dependentAmount:
+          description: "How many dependents the client has"
+          type: integer
+        passportIssueDate:
+          description: "Client's passport IssueDate"
+          type: string
+          format: date
+          example:
+            1985-01-29
+        passportIssueBranch:
+          description: "Client's passport issue branch"
+          type: string
+        employment:
+          $ref: '#/components/schemas/EmploymentDTO'
+        account:
+          description: "Client's account"
+          type: string
+
+    ApplicationStatus:
+      type: string
+      enum:
+        - REQUEST_DENIED
+        - PREAPPROVAL
+        - APPROVED
+        - CC_DENIED
+        - CC_APPROVED
+        - PREPARE_DOCUMENTS
+        - DOCUMENT_CREATED
+        - CLIENT_DENIED
+        - DOCUMENT_SIGNED
+        - CREDIT_ISSUED
+
+      description: "Application status"
+
+    ApplicationStatusHistoryDTO:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/ApplicationStatus'
+        timeStamp:
+          description: "Time Stamp"
+          type: string
+          format: 'date-time'
+        changeType:
+          type: string
+          description: "Automatic or Manual type"
+          enum:
+            - AUTOMATIC
+            - MANUAL
+
+
+
+
+    ClientDTO:
+      title: "Client"
+      type: object
+      description: "Client's info"
+      properties:
+        lastName:
+          type: string
+          description: "Client's last name"
+          pattern: '^[a-zA-Zа-яА-Я]{2,30}'
+        firstName:
+          type: string
+          description: "Client's firstname"
+          pattern: '^[a-zA-Zа-яА-Я]{2,30}'
+        middleName:
+          type: string
+          description: "Client's middle name (if present)"
+          pattern: '^[a-zA-Zа-яА-Я]{2,30}'
+        birthdate:
+          description: "Client's birthdate"
+          type: string
+          format: date
+          example:
+            1985-01-29
+        email:
+          type: string
+          pattern: '[\w\.]{2,50}@[\w\.]{2,20}'
+          description: "Client's e-mail"
+        gender:
+          description: "Client's gender"
+          type: string
+          enum:
+            - MALE
+            - FEMALE
+            - NON_BINARY
+        maritalStatus:
+          description: "Client's marital status"
+          type: string
+          enum:
+            - MARRIED
+            - DIVORCED
+            - SINGLE
+            - WIDOW_WIDOWER
+        dependentAmount:
+          type: integer
+          description: "Client's dependents amount"
+        passportInfo:
+          $ref: '#/components/schemas/PassportInfo'
+        employment:
+          $ref: '#/components/schemas/EmploymentDTO'
+        account:
+          type: string
+          description: "Client account"
+
+    PassportInfo:
+      title: "Passport info"
+      type: object
+      properties:
+        passportSeries:
+          description: "Client's passport series"
+          type: string
+          pattern: '^\d{4}$/'
+        passportNumber:
+          description: "Client's passport number"
+          type: string
+          pattern: '^\d{6}$/'
+        passportIssueBranch:
+          description: "Client's passport issue branch"
+          type: string
+        passportIssueDate:
+          description: "Client's passport IssueDate"
+          type: string
+          format: date
+          example:
+            1985-01-29
+
+    EmailMessageDTO:
+      title: "Email Message"
+      type: object
+      description: "Email Message object for sending email by dossier service"
+      properties:
+        address:
+          type: string
+          pattern: '[\w\.]*@\w{2,10}\.\w{2,5}'
+          description: "Client's email address"
+        theme:
+          type: string
+          description: "Email's theme"
+          enum:
+            - FINISH_REGISTRATION
+            - CREATE_DOCUMENT
+            - SEND_DOCUMENT
+            - SEND_SES
+            - CREDIT_ISSUED
+            - APPLICATION_DENIED
+        applicationId:
+          type: integer
+          format: int64
+          description: "Application Id"
+
+
 
 
 

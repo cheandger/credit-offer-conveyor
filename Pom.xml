@@ -16,6 +16,8 @@
     <modules>
         <module>api</module>
         <module>conveyor</module>
+        <module>deal</module>
+        <module>coc_db</module>
     </modules>
     <packaging>pom</packaging>
 

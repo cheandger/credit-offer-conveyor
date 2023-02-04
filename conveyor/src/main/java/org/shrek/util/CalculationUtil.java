@@ -4,7 +4,6 @@ import com.shrek.model.PaymentScheduleElement;
 import com.shrek.model.ScoringDataDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
