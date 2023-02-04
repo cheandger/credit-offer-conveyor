@@ -23,7 +23,7 @@ import static org.shrek.util.CalculationUtil.calculateIsInsuranceCaseTotalAmount
 import static org.shrek.util.CalculationUtil.calculateMonthlyPayment;
 
 @Service
-
+@PropertySource("config_properties.yaml")
 public class OffersServiceImpl implements OffersService {
 
     private static final Logger log = LoggerFactory.getLogger(OffersServiceImpl.class);
