@@ -8,8 +8,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.shrek.exceptions.ParametersValidationException;
 import org.shrek.offerservice.loanapplreqdtoconfig.LoanApplicationRequestDTOInitializer;
-import org.shrek.servises.OffersService;
-import org.shrek.servises.impl.OffersServiceImpl;
+import org.shrek.services.OffersService;
+import org.shrek.services.impl.OffersServiceImpl;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

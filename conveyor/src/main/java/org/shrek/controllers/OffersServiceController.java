@@ -3,7 +3,7 @@ package org.shrek.controllers;
 import com.shrek.controller.OffersServiceApi;
 import com.shrek.model.LoanApplicationRequestDTO;
 import com.shrek.model.LoanOfferDTO;
-import org.shrek.servises.OffersService;
+import org.shrek.services.OffersService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestParam;

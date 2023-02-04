@@ -1,0 +1,559 @@
+openapi: 3.0.1
+info:
+  title: dealConveyor
+  version: 0.0.1
+servers:
+  - url: http://localhost:8080
+tags:
+
+  - name: DealService
+    description: Create Client, retuns offers, post to conveyor
+  - name: DealDocumentService
+    description: Send, Sign, request the docs
+
+
+paths:
+  /deal/application:
+    post:
+      tags:
+        - DealService
+      summary: Create the Client entity save to BD
+      operationId: createListOffersByFeignClient
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanApplicationRequestDTO'
+
+      responses:
+        '200':
+          description: 'Ok. Successful offer response'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LoanOfferDTO'
+
+        '400':
+          description: 'Error 400 Bad request'
+
+        '422':
+          description: 'Error 422 UnProcessable Entity'
+
+        '500':
+          description: 'Error 500 internalServerError'
+
+  /deal/offer:
+    put:
+      tags:
+        - DealService
+      summary: Offer selection
+      operationId: getAppChangeStatus
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoanOfferDTO'
+
+      responses:
+        '200':
+          description: 'Ok. The status history is changed'
+        '400':
+          description: 'Error 400 Bad request'
+        '422':
+          description: 'Error 422 UnProcessable Entity'
+        '500':
+          description: 'Error 500 internalServerError'
+
+  /deal/calculate/{applicationId}:
+    parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+    put:
+      tags:
+        - DealService
+      summary: Credit product calculation
+      operationId: formScoringData
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FinishRegistrationRequestDTO'
+      responses:
+        '200':
+          description: 'Ok. The ScoringDataDTO is filled with data'
+
+        '400':
+          description: 'Error 400 Bad request'
+
+        '422':
+          description: 'Error 422 UnProcessable Entity'
+
+        '500':
+          description: 'Error 500 internalServerError'
+
+  /deal/document/{applicationId}/send:
+    parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+    post:
+      tags:
+        - DealDocumentService
+      summary: Request to send documents
+      operationId: sendDocuments
+      responses:
+        '200':
+          description: 'Request sent'
+        '400':
+          description: 'Error 400 Bad request'
+
+        '422':
+          description: 'Error 422 UnProcessable Entity'
+
+        '500':
+          description: 'Error 500 internalServerError'
+
+  /deal/document/{applicationId}/sign:
+    parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+    post:
+      tags:
+        - DealDocumentService
+      summary: Request to sign documents
+      operationId: signDocuments
+      responses:
+        '200':
+          description: 'Request sent for signing'
+        '400':
+          description: 'Error 400 Bad request'
+        '422':
+          description: 'Error 422 UnProcessable Entity'
+        '500':
+          description: 'Error 500 internalServerError'
+
+  /deal/document/{applicationId}/code:
+    parameters:
+      - $ref: '#/components/parameters/ApplicationId'
+    post:
+      tags:
+        - DealDocumentService
+      summary: Documents signing
+      operationId: sendCode
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: 'Documents signed'
+        '400':
+          description: 'Error 400 Bad request'
+        '422':
+          description: 'Error 422 UnProcessable Entity'
+        '500':
+          description: 'Error 500 internalServerError'
+
+components:
+  parameters:
+    ApplicationId:
+      name: applicationId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+  schemas:
+
+    LoanOfferDTO:
+      description: "DTO object that contains different vars of LoanOffer"
+      type: object
+      properties:
+        applicationId:
+          description: "Different Id"
+          type: integer
+          format: int64
+        requestedAmount:
+          description: "The amount of money, the client wants to loan"
+          type: number
+        totalAmount:
+          description: "Full amount of money, that the client must return"
+          type: number
+        term:
+          description: "The term for which the client wants to take out a loan"
+          type: integer
+        monthlyPayment:
+          description: "The amount of money that the client must return per month"
+          type: number
+        rate:
+          description: "Annual interest rate at which the client borrows"
+          type: number
+        isInsuranceEnabled:
+          description: "Is the loan insured"
+          type: boolean
+        isSalaryClient:
+          description: "Is the client a payroll client"
+          type: boolean
+
+
+
+    LoanApplicationRequestDTO:
+      type: object
+      required:
+        - amount
+        - term
+        - firstName
+        - lastName
+        - email
+        - birthdate
+        - passportSeries
+        - passportNumber
+      properties:
+        amount:
+          description: "The amount of money, the client wants to loan"
+          type: number
+          minimum: 10000
+        term:
+          description: "The term for which the client wants to take out a loan"
+          type: integer
+          minimum: 6
+        firstName:
+          description: "Client's firstname"
+          type: string
+          pattern: '^[a-zA-Zа-яА-Я]{2,30}'
+        lastName:
+          description: "Client's lastname"
+          type: string
+          pattern: '^[a-zA-Zа-яА-Я]{2,30}'
+        middleName:
+          description: "Client's patronymic"
+          type: string
+          pattern: '^[a-zA-Zа-яА-Я]{2,30}'
+        email:
+          description: "Client's e-mail"
+          type: string
+          format: email
+          pattern: '[\w\.]{2,50}@[\w\.]{2,20}'
+        birthdate:
+          description: "Client's birthdate"
+          type: string
+          format: date
+          example:
+            1985-01-29
+        passportSeries:
+          description: "Client's passport series"
+          type: string
+          pattern: '^\d{4}$/'
+        passportNumber:
+          description: "Client's passport number"
+          type: string
+          pattern: '^\d{6}$/'
+
+    CreditDTO:
+      type: object
+      properties:
+        amount:
+          description: "The amount of money, the client wants to loan"
+          type: number
+          minimum: 10000
+        term:
+          description: "The term for which the client wants to take out a loan"
+          type: integer
+          minimum: 6
+        monthlyPayment:
+          description: "The amount of money that the client must return per month"
+          type: number
+        rate:
+          description: "Annual interest rate at which the client borrows"
+          type: number
+        psk:
+          description: "It is the total of all funds that the consumer must pay to the bank during the life of the credit transaction"
+          type: number
+        isInsuranceEnabled:
+          description: "Is the loan insured"
+          type: boolean
+        isSalaryClient:
+          description: "Is the client a payroll client"
+          type: boolean
+        paymentSchedule:
+          description: "Differentiated list of monthly payments"
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentScheduleElement'
+
+
+
+    EmploymentDTO:
+      type: object
+      properties:
+        employmentStatus:
+          description: "Client's employmentStatus"
+          type: string
+          enum:
+            - UNEMPLOYED
+            - SELF_EMPLOYED
+            - EMPLOYED
+            - BUSINESS_OWNER
+        employerINN:
+          description: "Client's individual tax number"
+          type: string
+          format: int64
+          pattern: '^\d{10}$/'
+        salary:
+          description: "the amount of client's salary"
+          type: number
+        position:
+          description: "The client's professional position at work"
+          type: string
+          enum:
+            - WORKER
+            - MID_MANAGER
+            - TOP_MANAGER
+            - OWNER
+        workExperienceTotal:
+          description: "Full client's official work experience"
+          type: integer
+        workExperienceCurrent:
+          description: "Client's official work experience at the current workplace"
+          type: integer
+
+
+    PaymentScheduleElement:
+      type: object
+      properties:
+        number:
+          description: "Number of PaymentScheduleElement"
+          type: integer
+        date:
+          description: "Payment date"
+          type: string
+          format: date
+          example:
+            1985-01-29
+        totalPayment:
+          description: "Total monthly payment"
+          type: number
+        interestPayment:
+          description: "Interest monthly Payment"
+          type: number
+        debtPayment:
+          description: "debt monthly Payment"
+          type: number
+        remainingDebt:
+          type: number
+
+    FinishRegistrationRequestDTO:
+      type: object
+      properties:
+        gender:
+          description: "Client's gender"
+          type: string
+          enum:
+            - MALE
+            - FEMALE
+            - NON_BINARY
+        maritalStatus:
+          description: "Client's marital status"
+          type: string
+          enum:
+            - MARRIED
+            - DIVORCED
+            - SINGLE
+            - WIDOW_WIDOWER
+        dependentAmount:
+          description: "How many dependents the client has"
+          type: integer
+        passportIssueDate:
+          description: "Client's passport IssueDate"
+          type: string
+          format: date
+          example:
+            1985-01-29
+        passportIssueBranch:
+          description: "Client's passport issue branch"
+          type: string
+        employment:
+          $ref: '#/components/schemas/EmploymentDTO'
+        account:
+          description: "Client's account"
+          type: string
+
+    ApplicationStatus:
+      type: string
+      enum:
+        - REQUEST_DENIED
+        - PREAPPROVAL
+        - APPROVED
+        - CC_DENIED
+        - CC_APPROVED
+        - PREPARE_DOCUMENTS
+        - DOCUMENT_CREATED
+        - CLIENT_DENIED
+        - DOCUMENT_SIGNED
+        - CREDIT_ISSUED
+
+      description: "Application status"
+
+    ApplicationStatusHistoryDTO:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/ApplicationStatus'
+        timeStamp:
+          description: "Time Stamp"
+          type: string
+          format: 'date-time'
+        changeType:
+          type: string
+          description: "Automatic or Manual type"
+          enum:
+            - AUTOMATIC
+            - MANUAL
+
+
+
+
+    Client:
+      title: "Client"
+      type: object
+      description: "Client's info"
+      properties:
+        lastName:
+          type: string
+          description: "Client's last name"
+          pattern: '^[a-zA-Zа-яА-Я]{2,30}'
+        firstName:
+          type: string
+          description: "Client's firstname"
+          pattern: '^[a-zA-Zа-яА-Я]{2,30}'
+        middleName:
+          type: string
+          description: "Client's middle name (if present)"
+          pattern: '^[a-zA-Zа-яА-Я]{2,30}'
+        birthdate:
+          description: "Client's birthdate"
+          type: string
+          format: date
+          example:
+            1985-01-29
+        email:
+          type: string
+          pattern: '[\w\.]{2,50}@[\w\.]{2,20}'
+          description: "Client's e-mail"
+        gender:
+          description: "Client's gender"
+          type: string
+          enum:
+            - MALE
+            - FEMALE
+            - NON_BINARY
+        maritalStatus:
+          description: "Client's marital status"
+          type: string
+          enum:
+            - MARRIED
+            - DIVORCED
+            - SINGLE
+            - WIDOW_WIDOWER
+        dependentAmount:
+          type: integer
+          description: "Client's dependents amount"
+        passportInfo:
+          $ref: '#/components/schemas/PassportInfo'
+        employment:
+          $ref: '#/components/schemas/EmploymentDTO'
+        account:
+          type: string
+          description: "Client account"
+
+    PassportInfo:
+      title: "Passport info"
+      type: object
+      properties:
+        passportSeries:
+          description: "Client's passport series"
+          type: string
+          pattern: '^\d{4}$/'
+        passportNumber:
+          description: "Client's passport number"
+          type: string
+          pattern: '^\d{6}$/'
+        passportIssueBranch:
+          description: "Client's passport issue branch"
+          type: string
+        passportIssueDate:
+          description: "Client's passport IssueDate"
+          type: string
+          format: date
+          example:
+            1985-01-29
+
+
+    EmailMessageDTO:
+      title: "Email Message"
+      type: object
+      description: "Email Message object for sending email by dossier service"
+      properties:
+        address:
+          type: string
+          pattern: '[\w\.]*@\w{2,10}\.\w{2,5}'
+          description: "Client's email address"
+        theme:
+          type: string
+          description: "Email's theme"
+          enum:
+            - FINISH_REGISTRATION
+            - CREATE_DOCUMENT
+            - SEND_DOCUMENT
+            - SEND_SES
+            - CREDIT_ISSUED
+            - APPLICATION_DENIED
+        applicationId:
+          type: integer
+          format: int64
+          description: "Application Id"
+
+
+
+
+    Application:
+      title: Application
+      type: object
+      description: "Application info"
+      required:
+        - applicationId
+        - status
+        - client
+        - creationDate
+        - statusHistory
+      properties:
+        applicationId:
+          type: integer
+          format: int64
+          description: "Application id"
+        client:
+          $ref: '#/components/schemas/Client'
+        credit:
+          $ref: '#/components/schemas/CreditDTO'
+        status:
+          $ref: '#/components/schemas/ApplicationStatus'
+        creationDate:
+          type: string
+          format: date-time
+          description: 'Application creation date'
+        signDate:
+          type: string
+          format: date-time
+          description: 'Application sign date'
+        sesCode:
+          type: string
+          description: 'Application Simple Electric Sign code'
+        statusHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApplicationStatusHistoryDTO'
+
+
+
+
