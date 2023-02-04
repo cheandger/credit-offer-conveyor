@@ -22,7 +22,7 @@ import java.util.List;
 import static org.shrek.util.CalculationUtil.*;
 
 @Service
-
+@PropertySource("config_properties.yaml")
 public class CalculationServiceImpl implements CalculationService {
 
     private static final Logger log = LoggerFactory.getLogger(CalculationServiceImpl.class);
