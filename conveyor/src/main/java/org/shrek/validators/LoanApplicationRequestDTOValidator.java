@@ -20,7 +20,7 @@ public class LoanApplicationRequestDTOValidator implements Validator {
     @Override
     public void validate(@NotNull Object target, @NotNull Errors errors) {
         LoanApplicationRequestDTO params = (LoanApplicationRequestDTO) target;
-        Optional<LocalDate> birthDate = Optional.ofNullable(params.getBirthdate());
+        Optional<LocalDate> birthDate = Optional.ofNullable(params.getBirthDate());
         Optional<LocalDate> today = Optional.of(LocalDate.now());
         if ((((birthDate.isPresent()) && (today.get().getYear() - birthDate.get().getYear()) < 18))) {
             errors.reject("nonValidAge", "The date of birth must be at least 18 years old before today");

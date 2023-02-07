@@ -21,7 +21,7 @@ public class ScoringDataDtoInitializer {
                 .firstName("Вася")
                 .lastName("Пупкин")
                 .gender(gender)
-                .birthdate(birthdate)
+                .birthDate(birthdate)
                 .passportSeries("2355")
                 .passportNumber("564836")
                 .passportIssueDate(LocalDate.of(2005, 5, 5))

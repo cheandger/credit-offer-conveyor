@@ -126,7 +126,6 @@ public class CalculationServiceImpl implements CalculationService {
                 .paymentSchedule(scheduleList);
     }
 
-
 }
 
 

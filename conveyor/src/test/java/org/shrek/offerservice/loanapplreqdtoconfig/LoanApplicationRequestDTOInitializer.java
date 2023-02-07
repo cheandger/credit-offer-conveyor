@@ -20,7 +20,7 @@ public class LoanApplicationRequestDTOInitializer {
                 .lastName("Пупкин")
                 .middleName("Поликарпович")
                 .email("no-reply@mcplat.ru")
-                .birthdate(birthdate)
+                .birthDate(birthdate)
                 .passportSeries("789456")
                 .passportNumber("1239");
 

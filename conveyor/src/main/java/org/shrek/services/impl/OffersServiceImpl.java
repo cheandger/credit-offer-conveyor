@@ -15,6 +15,7 @@ import org.springframework.validation.ObjectError;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -92,7 +93,7 @@ public class OffersServiceImpl implements OffersService {
 
 
         return new LoanOfferDTO()
-                .requestedAmount(loanApplicationRequestDTO.getAmount())
+                .requestedAmount(loanApplicationRequestDTO.getAmount().setScale(2, RoundingMode.HALF_UP))
                 .totalAmount(totalAmount)
                 .term(loanApplicationRequestDTO.getTerm())
                 .monthlyPayment(monthlyPayment)

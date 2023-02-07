@@ -46,34 +46,5 @@ public class Application {
     @Column(name = "status_history")
     @Type(type = "jsonb")
     private List<ApplicationStatusHistoryDTO> statusHistory;
-/*
-    public void updateApplicationStatus(ApplicationStatus newStatus,
-                                        ApplicationStatusHistoryDTO.ChangeTypeEnum changeType) {
-
-        List<ApplicationStatusHistoryDTO> updatedStatusHistory = updateStatusHistory(
-                this.getStatusHistory(),
-                newStatus,
-                changeType
-        );
-
-        this.setStatus(newStatus)
-                .setStatusHistory(updatedStatusHistory);
-    }
-
-    private List<ApplicationStatusHistoryDTO> updateStatusHistory(List<ApplicationStatusHistoryDTO> history,
-                                                                  ApplicationStatus newStatus,
-                                                                  ApplicationStatusHistoryDTO.ChangeTypeEnum changeType) {
-        if (history == null) {
-            history = new ArrayList<>();
-        }
-
-        history.add(new ApplicationStatusHistoryDTO()
-                .status(newStatus)
-                .timeStamp(LocalDateTime.now())
-                .changeType(changeType));
-        return history;
-    }
-}
-*/
 
 }

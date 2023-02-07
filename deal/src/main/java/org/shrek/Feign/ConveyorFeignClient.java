@@ -15,9 +15,15 @@ import java.util.List;
 public interface ConveyorFeignClient {
 
     @PostMapping("/offers")
-    ResponseEntity<List<LoanOfferDTO>> getOffers(@RequestBody LoanApplicationRequestDTO request);
+    ResponseEntity<List<LoanOfferDTO>> createOffers(@RequestBody LoanApplicationRequestDTO request);
 
     @PostMapping("/calculation")
-    ResponseEntity<CreditDTO> calculateCredit(@RequestBody ScoringDataDTO scoringData);
+    ResponseEntity<CreditDTO> calculate(@RequestBody ScoringDataDTO scoringData);
+/*
+    @RequestMapping(method = RequestMethod.POST, value = "/offers", consumes = "application/json")
+    List<LoanOfferDTO> createOffers(LoanApplicationRequestDTO data);
+
+    @RequestMapping(method = RequestMethod.POST, value = "/calculation", consumes = "application/json")
+    CreditDTO calculate(ScoringDataDTO data);*/
 
 }

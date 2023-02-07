@@ -2,9 +2,10 @@ package org.shrek.models;
 
 import com.shrek.model.EmploymentDTO;
 import com.shrek.model.PassportInfo;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -12,8 +13,8 @@ import java.time.LocalDate;
 
 @Entity(name = "client")
 @Data
-@NoArgsConstructor
-//@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
+@Table(name = "clients")//???
+@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 public class Client {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

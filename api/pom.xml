@@ -44,7 +44,7 @@
             <artifactId>jackson-databind-nullable</artifactId>
             <version>0.2.4</version>
         </dependency>
-       
+
     </dependencies>
 
     <build>
@@ -79,21 +79,25 @@
                             <output>${project.basedir}/target/generated-sources/openapi</output>
                             <modelPackage>com.shrek.model</modelPackage>
                             <apiPackage>com.shrek.controller</apiPackage>
+
+                            <configOptions>
+                                <sourceFolder>src/gen/java/main</sourceFolder>
+                                <interfaceOnly>true</interfaceOnly>
+                                <useTags>true</useTags>
+                                <java8>true</java8>
+                                <dateLibrary>custom</dateLibrary>
+
+                            </configOptions>
                             <typeMappings>
+                                <typeMapping>DateTime=java.time.LocalDateTime</typeMapping>
+                                <typeMapping>Date=java.time.LocalDate</typeMapping>
                                 <typeMapping>OffsetDateTime=LocalDateTime</typeMapping>
                             </typeMappings>
                             <importMappings>
-                                <importMapping>java.time.OffsetDateTime=java.time.LocalDateTime</importMapping>
+                                <importMapping>java.time.Date=java.time.LocalDate</importMapping>
+                                <importMapping>LocalDate=java.time.LocalDate</importMapping>
+                                <importMapping>Date-Time=java.time.LocalDateTime</importMapping>
                             </importMappings>
-                            <invokerPackage>com.shrek.invoker.handler</invokerPackage>
-                            <configOptions>
-                                <interfaceOnly>true</interfaceOnly>
-                                <java8>true</java8>
-
-                                <jsr310>true</jsr310>
-                                <useTags>true</useTags>
-                                <sourceFolder>src/gen/java/main</sourceFolder>
-                            </configOptions>
                         </configuration>
                     </execution>
                 </executions>

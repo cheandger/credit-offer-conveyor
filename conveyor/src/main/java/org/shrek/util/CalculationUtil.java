@@ -215,10 +215,10 @@ public class CalculationUtil {
             preEvalRate = preEvalRate.add(BigDecimal.valueOf(1));
         }
 
-        if ((scoringDataDTO.getGender().equals(MALE) && (LocalDate.now().getYear() - scoringDataDTO.getBirthdate()
-                .getYear()) < 55 && (LocalDate.now().getYear() - scoringDataDTO.getBirthdate().getYear()) > 30) ||
+        if ((scoringDataDTO.getGender().equals(MALE) && (LocalDate.now().getYear() - scoringDataDTO.getBirthDate()
+                .getYear()) < 55 && (LocalDate.now().getYear() - scoringDataDTO.getBirthDate().getYear()) > 30) ||
                 (scoringDataDTO.getGender().equals(FEMALE) && (LocalDate.now().getYear() - scoringDataDTO.
-                        getBirthdate().getYear()) < 60 && ((LocalDate.now().getYear() - scoringDataDTO.getBirthdate().getYear()) > 35))) {
+                        getBirthDate().getYear()) < 60 && ((LocalDate.now().getYear() - scoringDataDTO.getBirthDate().getYear()) > 35))) {
 
             preEvalRate = preEvalRate.subtract(BigDecimal.valueOf(3));
 

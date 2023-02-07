@@ -36,7 +36,7 @@ public class ScoringDataDTOValidator implements Validator {
         EmploymentDTO employmentDTO = (EmploymentDTO) params.getEmployment();
 
         BigDecimal amount = params.getAmount();
-        LocalDate birthdate = params.getBirthdate();
+        LocalDate birthdate = params.getBirthDate();
         String employmentStatus = String.valueOf(employmentDTO.getEmploymentStatus());
         BigDecimal salary = employmentDTO.getSalary();
         Integer workExperienceTotal = employmentDTO.getWorkExperienceTotal();

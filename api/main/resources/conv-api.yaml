@@ -135,7 +135,7 @@ paths:
         '500':
           description: 'Error 500 internalServerError'
 
-  /deal/calculate/{applicationId}:
+  /deal/calculate/{application_id}:
     parameters:
       - $ref: '#/components/parameters/ApplicationId'
     put:
@@ -148,6 +148,7 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/FinishRegistrationRequestDTO'
+
       responses:
         '200':
           description: 'Ok. The ScoringDataDTO is filled with data'
@@ -288,20 +289,20 @@ components:
       description: "DTO object that contains different vars of LoanOffer"
       type: object
       properties:
-        applicationId:
+        application_id:
           description: "Different Id"
           type: integer
           format: int64
-        requestedAmount:
+        requested_amount:
           description: "The amount of money, the client wants to loan"
           type: number
-        totalAmount:
+        total_amount:
           description: "Full amount of money, that the client must return"
           type: number
         term:
           description: "The term for which the client wants to take out a loan"
           type: integer
-        monthlyPayment:
+        monthly_payment:
           description: "The amount of money that the client must return per month"
           type: number
         rate:
@@ -321,10 +322,10 @@ components:
       required:
         - amount
         - term
-        - firstName
-        - lastName
+        - first_name
+        - last_name
         - email
-        - birthdate
+        - birth_date
         - passportSeries
         - passportNumber
       properties:
@@ -336,15 +337,15 @@ components:
           description: "The term for which the client wants to take out a loan"
           type: integer
           minimum: 6
-        firstName:
+        first_name:
           description: "Client's firstname"
           type: string
           pattern: '^[a-zA-Zа-яА-Я]{2,30}'
-        lastName:
+        last_name:
           description: "Client's lastname"
           type: string
           pattern: '^[a-zA-Zа-яА-Я]{2,30}'
-        middleName:
+        middle_name:
           description: "Client's patronymic"
           type: string
           pattern: '^[a-zA-Zа-яА-Я]{2,30}'
@@ -353,7 +354,7 @@ components:
           type: string
           format: email
           pattern: '[\w\.]{2,50}@[\w\.]{2,20}'
-        birthdate:
+        birth_date:
           description: "Client's birthdate"
           type: string
           format: date
@@ -408,7 +409,7 @@ components:
         - firstName
         - lastName
         - gender
-        - birthdate
+        - birth_date
         - passportSeries
         - passportNumber
         - passportIssueDate
@@ -417,8 +418,8 @@ components:
         - dependentAmount
         - employment
         - account
-        - isInsuranceEnabled
-        - isSalaryClient
+        - is_insurance_enabled
+        - is_salary_client
       properties:
         amount:
           description: "The amount of money, the client wants to loan"
@@ -447,7 +448,7 @@ components:
             - MALE
             - FEMALE
             - NON_BINARY
-        birthdate:
+        birth_date:
           description: "Client's birthdate"
           type: string
           format: date
@@ -486,10 +487,10 @@ components:
         account:
           description: "Client's account"
           type: string
-        isInsuranceEnabled:
+        is_insurance_enabled:
           description: "Is the loan insured"
           type: boolean
-        isSalaryClient:
+        is_salary_client:
           description: "Is the client a payroll client"
           type: boolean
 
@@ -563,7 +564,7 @@ components:
             - MALE
             - FEMALE
             - NON_BINARY
-        maritalStatus:
+        marital_status:
           description: "Client's marital status"
           type: string
           enum:
@@ -571,7 +572,7 @@ components:
             - DIVORCED
             - SINGLE
             - WIDOW_WIDOWER
-        dependentAmount:
+        dependent_amount:
           description: "How many dependents the client has"
           type: integer
         passportIssueDate:
@@ -613,7 +614,7 @@ components:
         timeStamp:
           description: "Time Stamp"
           type: string
-          format: 'date-time'
+          format: date-time
         changeType:
           type: string
           description: "Automatic or Manual type"
