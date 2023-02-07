@@ -12,12 +12,12 @@ import java.util.List;
 
 @Entity(name = "credit")
 @Data
-//@NoArgsConstructor
+
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 public class Credit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+    @Column(name = "credit_id", nullable = false)
     private Long id;
     @Column(name = "amount")
     private BigDecimal amount;
@@ -32,9 +32,9 @@ public class Credit {
     @Column(name = "payment_schedule")
     @Type(type = "jsonb")
     private List<PaymentScheduleElement> paymentSchedule;
-    @Column(name = "is_insurance_enabled")
+    @Column(name = "insurance_enabled")
     private Boolean isInsuranceEnabled;
-    @Column(name = "is_salary_client")
+    @Column(name = "salary_client")
     private Boolean isSalaryClient;
     @Column(name = "credit_status")
     @Enumerated(EnumType.STRING)

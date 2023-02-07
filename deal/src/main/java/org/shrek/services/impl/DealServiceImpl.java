@@ -27,11 +27,12 @@ import static org.shrek.services.utils.DealServiceUtils.*;
 
 
 @Service
-@RequiredArgsConstructor//?? todo Ask How is better
+@RequiredArgsConstructor
 public class DealServiceImpl implements DealService {
 
     private static final Logger log = LoggerFactory.getLogger(DealServiceImpl.class);
     private final CreditMapper creditMapper;
+
     private final ClientMapper clientMapper;
     private final ClientFromFinishRegMapper clientFromFinishRegMapperMapper;
     private final ScoringDataFromClientMapper scoringMapper;

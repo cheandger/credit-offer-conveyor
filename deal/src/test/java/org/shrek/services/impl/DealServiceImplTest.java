@@ -16,6 +16,7 @@ import org.shrek.repository.ClientRepository;
 import org.shrek.repository.CreditRepository;
 import org.shrek.services.DealService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
@@ -26,32 +27,42 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.shrek.services.impl.loanapplreqdtoconfig.LoanApplicationRequestDTOLoanOfferDTOInitializer.initLoanOffer;
 import static org.shrek.services.impl.loanapplreqdtoconfig.LoanApplicationRequestDTOLoanOfferDTOInitializer.loanAppReqInit;
 
+@SpringBootTest
 @ExtendWith(MockitoExtension.class)
 class DealServiceImplTest {
     @Mock
     ApplicationRepository applicationRepository;
-
     @Mock
     ClientRepository clientRepository;
-
     @Mock
     CreditRepository creditRepository;
-
     @Mock
     ConveyorFeignClient offersClient;
-
+    /*  @Mock
+      ClientMapper clientMapper;
+      @Mock
+      CreditMapper creditMapper;
+      @Mock
+      ObjectMapper objectMapper;
+      @Mock
+      ClientFromFinishRegMapper clientFromFinishRegMapper;
+      @Mock
+      ScoringDataFromClientMapper scoringDataFromClientMapper;*/
     @Autowired
-    DealService dealService;
+    DealService dealService;/*= new DealServiceImpl(creditMapper, clientMapperLocal, clientFromFinishRegMapper,
+            scoringDataFromClientMapper, applicationRepository, clientRepository, creditRepository, offersClient);*/
 
     @Test
-    @DisplayName("")
+    @DisplayName("Creation the list of loan offers test")
     void createListOffersByFeignClientTest() {
 
         LoanApplicationRequestDTO input = loanAppReqInit(BigDecimal.valueOf(100000), 12, LocalDate.parse("1985-01-29"));
+
+        //   ClientMapper clientMapperLocal = new ClientMapperImpl();
 
 
         List<LoanOfferDTO> output = new ArrayList<>();
@@ -60,26 +71,39 @@ class DealServiceImplTest {
         output.add(initLoanOffer(1L, BigDecimal.valueOf(100000.00), BigDecimal.valueOf(103000.00), 12, BigDecimal.valueOf(9456.00), BigDecimal.valueOf(24.00), true, false));
         output.add(initLoanOffer(1L, BigDecimal.valueOf(100000.00), BigDecimal.valueOf(103000.00), 12, BigDecimal.valueOf(9407.70), BigDecimal.valueOf(24.00), true, true));
 
+        // Client client = clientMapper.loanApplicationRequestDtoToClient(input);
+        //clientRepository.save(client);
+
         when(offersClient.createOffers(isA(LoanApplicationRequestDTO.class))).thenReturn(ResponseEntity.ok(output));
         assertEquals(output, dealService.createListOffersByFeignClient(input));
+        verify(clientRepository, times(1)).save(any(Client.class));
 
     }
 
-    /* @Test
-     @DisplayName("")
-     void saveApplicationTest() {
-         LoanApplicationRequestDTO input = loanAppReqInit(BigDecimal.valueOf(100000), 12, LocalDate.parse("1985-01-29"));
+    @Test
+    @DisplayName("Test the client repository save method")
+    void saveApplicationTest() {
+        //LoanApplicationRequestDTO input = loanAppReqInit(BigDecimal.valueOf(100000), 12, LocalDate.parse("1985-01-29"));
+
+    }
+
+   /* @Test
+    @DisplayName("Test the clientMapper")
+    void checkClientMapperTest() throws JsonProcessingException, JSONException {
+
+        LoanApplicationRequestDTO input = loanAppReqInit(BigDecimal.valueOf(100000), 12, LocalDate.parse("1985-01-29"));
+
+        String client = objectMapper.writeValueAsString(clientMapper.loanApplicationRequestDtoToClient(input));
+        Client clientForTest = new Client();
+        clientForTest.setFirstName(input.getFirstName());
+        clientForTest.setLastName(input.getLastName());
+        clientForTest.setMiddleName(input.getMiddleName());
+        clientForTest.setBirthDate(input.getBirthDate());
+        String clientForTestString = objectMapper.writeValueAsString(clientForTest);
+        JSONAssert.assertEquals(clientForTestString, client, true);
+    }*/
 
 
-         Client client = new Client();
-         client.setId(123456L);
-         Optional<Client> optionalClient = Optional.of(client);
-         clientRepository.save(client);
-         Optional<Client> findClient = clientRepository.findById(optionalClient.get().getId());
-
-         assertEquals(optionalClient, findClient);
-     }
- */
     @Test
     void getAppChangeStatusTest() {
         //DealService service = new DealServiceImpl(applicationRepository, clientRepository, creditRepository, offersClient);

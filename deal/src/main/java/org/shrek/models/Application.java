@@ -6,25 +6,21 @@ import com.shrek.model.ApplicationStatusHistoryDTO;
 import com.shrek.model.LoanOfferDTO;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 
 @Entity(name = "application")
 @Data
-//@RequiredArgsConstructor
-@NoArgsConstructor
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 public class Application {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+    @Column(name = "application_id", nullable = false)
     private Long id;
     @OneToOne
     @JoinColumn(name = "client_id")
@@ -37,12 +33,13 @@ public class Application {
     private ApplicationStatus status;
     @Column(name = "creation_date")
     private LocalDateTime creationDate;
+    @Column(name = "applied_offer")
     @Type(type = "jsonb")
     private LoanOfferDTO appliedOffer;
     @Column(name = "sign_date")
-    private LocalDate signDate;
+    private LocalDateTime signDate;
     @Column(name = "ses_code")
-    private String sesCode;
+    private Long sesCode;
     @Column(name = "status_history")
     @Type(type = "jsonb")
     private List<ApplicationStatusHistoryDTO> statusHistory;

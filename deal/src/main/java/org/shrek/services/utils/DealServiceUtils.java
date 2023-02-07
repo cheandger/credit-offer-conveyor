@@ -33,8 +33,8 @@ public class DealServiceUtils<PassportMapper> {
 
     public static Application createAndFillTheApplication(LoanApplicationRequestDTO loanApplicationRequestDTO, ClientMapper clientMapper,
                                                           ApplicationRepository appRepo, ClientRepository clientRepository) {
-
-        Client client = clientMapper.loanApplicationRequestDtoToClient(loanApplicationRequestDTO);
+        Client client = new Client();
+        client = clientMapper.loanApplicationRequestDtoToClient(loanApplicationRequestDTO);
         log.info("create Client:  " + client);
         client.setPassport(new PassportInfo()
                 .passportSeries(loanApplicationRequestDTO.getPassportSeries())
@@ -105,7 +105,7 @@ public class DealServiceUtils<PassportMapper> {
 
     public static Client settingClient(Application application, FinishRegistrationRequestDTO finishRegistrationRequestDTO,
                                        ClientFromFinishRegMapper clientFMapper, ClientRepository clientRepository) {
-        Client client = application.getClient();//???todo BullShit in Db, ask for Dim
+        Client client = application.getClient();
         client.getPassport().setPassportIssueBranch(finishRegistrationRequestDTO.getPassportIssueBranch());
         client.getPassport().setPassportIssueDate(finishRegistrationRequestDTO.getPassportIssueDate());
         client = clientFMapper.clientFromFinishRegistration(finishRegistrationRequestDTO);
@@ -148,7 +148,7 @@ public class DealServiceUtils<PassportMapper> {
 
         log.info("The history of loan request is updated");
         Long random_number = new SecureRandom().nextLong(100, Long.MAX_VALUE);
-        application.setSesCode(String.valueOf(random_number));
+        application.setSesCode(random_number);
         applicationRepository.save(application);
         log.info("The Application was update and saved");
     }

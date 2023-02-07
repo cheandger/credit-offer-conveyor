@@ -13,12 +13,12 @@ import java.time.LocalDate;
 
 @Entity(name = "client")
 @Data
-@Table(name = "clients")//???
+
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 public class Client {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+    @Column(name = "client_id", nullable = false)
     private Long id;
     @Column(name = "last_name")
     private String lastName;
@@ -36,10 +36,10 @@ public class Client {
     private String maritalStatus;
     @Column(name = "dependent_amount")
     private Integer dependentAmount;
-    @Column(name = "passport")
+    @Column(name = "passport_info")
     @Type(type = "jsonb")
     private PassportInfo passport;
-    @Column(name = "employment")
+    @Column(name = "employment_info")
     @Type(type = "jsonb")
     private EmploymentDTO employment;
     @Column(name = "account")

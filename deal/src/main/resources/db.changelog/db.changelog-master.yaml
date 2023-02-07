@@ -1,0 +1,4 @@
+databaseChangeLog:
+  - include:
+      file: db.credit_offer_conv_bd_changeLog.xml
+      relativeToChangelogFile: true
