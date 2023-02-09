@@ -3,6 +3,7 @@ package org.shrek.models;
 import com.shrek.model.PaymentScheduleElement;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.Data;
+import lombok.experimental.Accessors;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
@@ -10,6 +11,7 @@ import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.List;
 
+@Accessors(chain = true)
 @Entity(name = "credit")
 @Data
 

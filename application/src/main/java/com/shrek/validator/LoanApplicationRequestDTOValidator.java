@@ -1,4 +1,4 @@
-package org.shrek.validators;
+package com.shrek.validator;
 
 import com.shrek.model.LoanApplicationRequestDTO;
 import org.springframework.validation.Errors;
@@ -10,6 +10,8 @@ import java.util.Optional;
 
 public class LoanApplicationRequestDTOValidator implements Validator {
 
+
+    @NotNull
 
     public boolean supports(Class<?> clazz) {
         return LoanApplicationRequestDTO.class.isAssignableFrom(clazz);

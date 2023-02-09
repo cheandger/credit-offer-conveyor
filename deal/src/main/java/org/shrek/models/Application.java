@@ -6,6 +6,7 @@ import com.shrek.model.ApplicationStatusHistoryDTO;
 import com.shrek.model.LoanOfferDTO;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.Data;
+import lombok.experimental.Accessors;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
@@ -13,7 +14,7 @@ import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
+@Accessors(chain = true)
 @Entity(name = "application")
 @Data
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)

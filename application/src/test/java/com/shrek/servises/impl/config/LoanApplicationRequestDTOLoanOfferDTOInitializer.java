@@ -1,4 +1,4 @@
-package org.shrek.services.impl.loanapplreqdtoconfig;
+package com.shrek.servises.impl.config;
 
 import com.shrek.model.LoanApplicationRequestDTO;
 import com.shrek.model.LoanOfferDTO;

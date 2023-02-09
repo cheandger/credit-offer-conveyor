@@ -14,9 +14,8 @@ tags:
   - name: DealDocumentService
     description: Send, Sign, request the docs
   - name: ApplicationService
-    description: Loanoffer list creation
-  - name: ApplicationOfferService
-    description: Choosing loan offer
+    description: Loanoffer list creation, choosing loan offer
+
 
 paths:
   /conveyor/offers:
@@ -253,7 +252,7 @@ paths:
   /application/offer:
     put:
       tags:
-        - ApplicationOfferService
+        - ApplicationService
       summary: Offer selection
       operationId: choiceLoanOffer
       requestBody:
@@ -593,7 +592,7 @@ components:
     ApplicationStatus:
       type: string
       enum:
-        - REQUEST_DENIED
+
         - PREAPPROVAL
         - APPROVED
         - CC_DENIED

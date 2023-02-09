@@ -30,17 +30,17 @@ public class CalculationUtil {
     public static BigDecimal calculateMonthlyPayment(BigDecimal totalAmount, Integer term, BigDecimal finalRate) {
 
 
-        log.info("Перерасчет базовой ставки с учетом условий скорринга");
+        log.info("Recalculation the base rate by scoring rules");
 
 
-        log.info("Расчет сотой доли месячной ставки");
+        log.info("Calculation of Hundredth Part Of Monthly Rate");
 
         BigDecimal aHundredthPartOfMonthlyRate = finalRate.divide(BigDecimal.valueOf(100), 6, RoundingMode.HALF_UP)
                 .divide(BigDecimal.valueOf(12), 6, RoundingMode.HALF_UP);
-        log.info("Сотая доля месячной ставки составляет  " + aHundredthPartOfMonthlyRate.multiply(BigDecimal.valueOf(100))
+        log.info("A hundredth Part Of Monthly Rate ={} ", aHundredthPartOfMonthlyRate.multiply(BigDecimal.valueOf(100))
                 .setScale(4, RoundingMode.HALF_UP));
 
-        log.info("Расчет ежемесячного платежа ");
+        log.info("Calculation of monthly payment ");
 
         /*
         Расчет ежемесячного платежа производится по формуле:
@@ -67,7 +67,7 @@ public class CalculationUtil {
                                 .pow(term))
                                 .subtract(BigDecimal.valueOf(1)), 6, RoundingMode.HALF_UP))))).setScale(2, RoundingMode.HALF_UP);
 
-        log.info("Ежемесячный платеж с учетом ануитетного графика погашения составляет " + monthlyPayment);
+        log.info("The monthly payment, taking into account the annuity repayment schedule, is={} ", monthlyPayment);
 
 
         return monthlyPayment;
@@ -78,7 +78,7 @@ public class CalculationUtil {
 
         BigDecimal totalAmount = requestAmount.setScale(2, RoundingMode.HALF_UP);
 
-        log.info("Перерасчет тела кредита с учетом условий скорринга");
+        log.info("Recalculation the total amount by scoring rules");
 
         if (isInsuranceEnabled) {
 
@@ -87,13 +87,13 @@ public class CalculationUtil {
                     .divide(BigDecimal.valueOf(12), 2, RoundingMode.HALF_UP)
                     .multiply(BigDecimal.valueOf(term))));
         }
-        log.info("Тело кредита с учетом условий скорринга составляет  " + totalAmount + "руб ");
+        log.info("The actual loan body is ={}  ", totalAmount);
 
         return totalAmount;
     }
 
     public static BigDecimal calculatePsk(Double amount, List<PaymentScheduleElement> paymentScheduleElementList) {
-        log.info("Расчет ПСК");
+        log.info("PSK calculation");
 
         /*
          ПСК = i * ЧБП * 100.
@@ -147,7 +147,7 @@ public class CalculationUtil {
             q[l] = Math.floor(days[l] / basePeriod);//величина степени, являющаяся порядковым номером базового периода
         }
 
-        log.info("Расчет i");
+        log.info("Calculation of i");
 
         // Необходимо найти наименьшую 'i'. Рассчитаем 'i' подстановкой, увеличивая ее на 0,0001
 
@@ -163,11 +163,10 @@ public class CalculationUtil {
             i = i + s;
         }
 
-        log.info("Расчет i окончен  i =  " + i);
+        log.info("  i ={}  ", i);
 
         BigDecimal psk = BigDecimal.valueOf(i * amountOfBasePeriodsInYear * 100).setScale(2, RoundingMode.HALF_UP);
-        log.info("Рассчитаная ПСК составляет: " + psk + " % " +
-                "////////////////////////////////////////////////////////////////////////////////////////////////////////////\n");
+        log.info("The PSK is ={} ", psk);
         return psk;
     }
 
@@ -175,7 +174,7 @@ public class CalculationUtil {
 
     public static BigDecimal evaluateRateByScoring(ScoringDataDTO scoringDataDTO, BigDecimal baseRate) {
 
-        log.info("Расчет годовой процентной ставки с учетом условий скорринга");
+        log.info("Calculation of rate by scoring rules");
 
         BigDecimal preEvalRate = baseRate;
 
@@ -228,7 +227,7 @@ public class CalculationUtil {
         }
 
 
-        log.info("Годовая процентная ставка по кредиту составляет  " + preEvalRate);
+        log.info("The rate is = {}  ", preEvalRate);
 
         return preEvalRate.setScale(2, RoundingMode.HALF_UP);
     }

@@ -49,7 +49,7 @@ public class CalculationServiceImpl implements CalculationService {
             throw new ParametersValidationException(objectError.getDefaultMessage());
         }
         ;
-        log.info("Проверка валидности входных данных");
+        log.info("Validation of inner data");
 
 
         BigDecimal totalAmount = calculateIsInsuranceCaseTotalAmount(scoringDataDTO.getAmount(),
@@ -68,11 +68,11 @@ public class CalculationServiceImpl implements CalculationService {
 
 
         BigDecimal firstMonthDeptPayment = monthlyPayment.subtract(firstMonthInterestPayment).setScale(2, RoundingMode.HALF_UP);
-        log.info("Расчет платежа по телу кредита за первый месяц:  " + firstMonthDeptPayment);
+        log.info("First month mouthlyPayment={}  ", firstMonthDeptPayment);
 
         List<PaymentScheduleElement> scheduleList = new ArrayList<>();
 
-        log.info("Составление первого элемента списка ежемесячных платежей");
+        log.info("Forming the first PaymentScheduleElement ");
         PaymentScheduleElement firstMonth = new PaymentScheduleElement()
                 .number(1)
                 .date(LocalDate.now().plusMonths(1))
@@ -83,7 +83,7 @@ public class CalculationServiceImpl implements CalculationService {
 
         scheduleList.add(firstMonth);
 
-        log.info("Составление графика ежемесячных платежей");
+        log.info("Forming the payment calendar");
 
         for (Integer i = 1; i < scoringDataDTO.getTerm(); i++) {
 
@@ -98,7 +98,7 @@ public class CalculationServiceImpl implements CalculationService {
             );
         }
 
-        log.info("Проверка и перераспределение вероятного остатка, вызванного округлением");
+        log.info("Checking the math pounding misstakes");
 
         if ((scheduleList.get(scheduleList.size() - 1).getRemainingDebt()).compareTo(BigDecimal.valueOf(0)) != 0) {
 
@@ -111,9 +111,9 @@ public class CalculationServiceImpl implements CalculationService {
 
             scheduleList.get(scheduleList.size() - 1).remainingDebt(BigDecimal.valueOf(0));
         }
-        log.info("График ежемесячных платежей  " + scheduleList);
+        log.info("Payment calendar={}  ", scheduleList);
 
-        log.info("Кредитный продукт создан \n");
+        log.info("The credit good is created \n");
 
         return new CreditDTO()
                 .amount(scoringDataDTO.getAmount())

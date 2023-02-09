@@ -2,8 +2,8 @@ package org.shrek.services.impl;
 
 import com.shrek.model.*;
 import lombok.RequiredArgsConstructor;
-import org.shrek.Feign.ConveyorFeignClient;
 import org.shrek.exceptions.BusinessException;
+import org.shrek.feign.ConveyorFeignClient;
 import org.shrek.mappers.ClientFromFinishRegMapper;
 import org.shrek.mappers.ClientMapper;
 import org.shrek.mappers.CreditMapper;
@@ -45,10 +45,11 @@ public class DealServiceImpl implements DealService {
     @Override
     public List<LoanOfferDTO> createListOffersByFeignClient(LoanApplicationRequestDTO loanApplicationRequestDTO) {
 
-        Application application = createAndFillTheApplication(loanApplicationRequestDTO, clientMapper, applicationRepository, clientRepository);
+        Application application = createAndFillTheApplication(loanApplicationRequestDTO, clientMapper, clientRepository);
         Long applicationId = application.getId();
+        applicationRepository.save(application);
 
-        ResponseEntity<List<LoanOfferDTO>> loanOffersResponse = creditConveyorClient.createOffers(loanApplicationRequestDTO);
+        ResponseEntity<List<LoanOfferDTO>> loanOffersResponse = creditConveyorClient.createOffers(loanApplicationRequestDTO);//POST
 
         if (loanOffersResponse.getStatusCode().is2xxSuccessful()) {
             List<LoanOfferDTO> loanOfferDTOS = loanOffersResponseGetBody(loanOffersResponse);
@@ -57,7 +58,7 @@ public class DealServiceImpl implements DealService {
             loanOfferDTOS.forEach((loanOfferDTO) -> loanOfferDTO.setApplicationId(applicationId));
             return loanOfferDTOS;
         } else {
-            changeApplicationDeniedStatus(application, applicationRepository);
+            changeApplicationDeniedStatus(application);
 
             log.warn("The response was bad, it hasn't body");
             throw new BusinessException(loanOffersResponse.getStatusCodeValue(), "Your loan request was denied.");
@@ -65,45 +66,49 @@ public class DealServiceImpl implements DealService {
     }
 
     @Override
-    public void getAppChangeStatus(LoanOfferDTO loanOfferDTO) {
+    public void getAppChangeStatusAfterApplying(LoanOfferDTO loanOfferDTO) {
 
         Application application = applicationRepository.findById(loanOfferDTO.getApplicationId())
-                .orElseThrow(() -> new EntityNotFoundException("Application with id = " + loanOfferDTO.getApplicationId() + " not found."));
+                .orElseThrow(() -> new EntityNotFoundException("Application not found"));
 
-        log.info("By id " + loanOfferDTO.getApplicationId() + " the request have found - " + application);
+        log.info("Application has found, application id = {}", application.getId());
 
-        changeAppStatusToPreapproval(application, loanOfferDTO, applicationRepository);
+        changeAppStatusToApproval(application, loanOfferDTO);
 
+        applicationRepository.save(application);
     }
 
     @Override
     public void formScoringData(Long applicationId, FinishRegistrationRequestDTO finishRegistrationRequestDTO) {
         Application application = applicationRepository.findById(applicationId)
-                .orElseThrow(() -> new EntityNotFoundException("Application with id = " + applicationId + " not found."));
+                .orElseThrow(() -> new EntityNotFoundException("Application not found"));
 
-
+        log.info("Application has found, application id = {}", application.getId());
         Client client = settingClient(application, finishRegistrationRequestDTO,
-                clientFromFinishRegMapperMapper, clientRepository);
-
+                clientFromFinishRegMapperMapper);
+        clientRepository.save(client);
         ScoringDataDTO scoringDataDTO = createScoringDataDTO(scoringMapper, client, application);
 
-        log.info("Doing request to Credit Conveyor");
 
-        ResponseEntity<CreditDTO> responseCreditDTO = creditConveyorClient.calculate(scoringDataDTO);
+        ResponseEntity<CreditDTO> responseCreditDTO = creditConveyorClient.calculate(scoringDataDTO);//POST
 
         if (responseCreditDTO.getStatusCode().is2xxSuccessful()) {
             CreditDTO creditDTO = responseCreditDTO.getBody();
-            log.info("The loan for applicationId = " + application.getId() + " is calculated: " + creditDTO);
+            log.info("The loan for applicationId {} ", application.getId() + " is calculated: " + creditDTO);
 
             Credit credit = createCredit(creditDTO, creditMapper);
+
+            application.setCredit(credit);
+
             creditRepository.save(credit);
 
-            application.setCredit(credit);//?????????? Whaaa??????todo
+            changeAppStatusToCCAPPROVED(application);
 
-            changeAppStatusToCC_APPROVED(application, applicationRepository);
-
+            applicationRepository.save(application);
+            log.info("applicationRepository.save(), application={}", application.getId());
         } else {
-            changeApplicationCC_DeniedStatus(application, applicationRepository);
+            changeApplicationCCDeniedStatus(application, applicationRepository);
+            applicationRepository.save(application);
             log.warn("The response was bad, it hasn't body");
             throw new BusinessException(responseCreditDTO.getStatusCodeValue(), "Your loan request was denied by the Credit Conveyor.");
 
@@ -123,63 +128,3 @@ public class DealServiceImpl implements DealService {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- /* EmailMessage emailMessage = new EmailMessage();
-            emailMessage.setApplicationId(application.getId());
-            emailMessage.setTheme(EmailMessage.ThemeEnum.APPLICATION_DENIED);
-            emailMessage.setAddress(application.getClient().getEmail());
-
-            kafkaSender.sendMessage(emailMessage.getTheme(), emailMessage);*/
-
-  /* EmailMessage emailMessage = new EmailMessage();
-        emailMessage.setApplicationId(loanOfferDTO.getApplicationId());
-        emailMessage.setTheme(EmailMessage.ThemeEnum.FINISH_REGISTRATION);
-        emailMessage.setAddress(application.getClient().getEmail());
-
-      */
-  /* EmailMessage emailMessage = new EmailMessage();
-        emailMessage.setApplicationId(applicationId);
-        emailMessage.setTheme(EmailMessage.ThemeEnum.CREATE_DOCUMENTS);
-        emailMessage.setAddress(application.getClient().getEmail());
-
-        kafkaSender.sendMessage(emailMessage.getTheme(), emailMessage);*/
-
-
-    /* Client client = new Client();
-        client.setFirstName(loanApplicationRequestDTO.getFirstName());
-        client.setLastName(loanApplicationRequestDTO.getLastName());
-        client.setMiddleName(loanApplicationRequestDTO.getMiddleName());
-        client.setEmail(loanApplicationRequestDTO.getEmail());
-        client.setBirthDate(loanApplicationRequestDTO.getBirthDate());
-        log.info("create Client:  " + client);77
-        clientRepository.save(client);
-        log.info("save Client:  " + client);
-        Application application = new Application();
-        application.setClient(client);
-        ApplicationStatusHistoryDTO applicationStatusHistoryDTO = new ApplicationStatusHistoryDTO();
-        applicationStatusHistoryDTO.status(PREAPPROVAL);
-        applicationStatusHistoryDTO.timeStamp(LocalDateTime.now());
-        applicationStatusHistoryDTO.changeType(ApplicationStatusHistoryDTO.ChangeTypeEnum.MANUAL);
-        List<ApplicationStatusHistoryDTO> statusHistory = new ArrayList<>();
-        statusHistory.add(applicationStatusHistoryDTO);
-        application.setStatus(PREAPPROVAL);
-        application.setStatusHistory(statusHistory);
-        Application savedApp = applicationRepository.save(application);*/

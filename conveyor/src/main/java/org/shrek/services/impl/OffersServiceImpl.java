@@ -48,23 +48,23 @@ public class OffersServiceImpl implements OffersService {
         dataBinder.validate();
         if (dataBinder.getBindingResult().hasErrors()) {
             ObjectError objectError = dataBinder.getBindingResult().getAllErrors().get(0);
-            log.info("Проверка валидности входных данных");
+            log.info("Validation of inner data");
             throw new ParametersValidationException(objectError.getDefaultMessage());
         }
 
         List<LoanOfferDTO> loanOfferDTOList = new ArrayList<>();
-        log.info("Создание вариантов предварительных кредитных предложений");
+        log.info("Creation of possible loan offers");
         loanOfferDTOList.add(createLoanOffer(loanApplicationRequestDTO, false, false));
         loanOfferDTOList.add(createLoanOffer(loanApplicationRequestDTO, false, true));
         loanOfferDTOList.add(createLoanOffer(loanApplicationRequestDTO, true, false));
         loanOfferDTOList.add(createLoanOffer(loanApplicationRequestDTO, true, true));
 
-        log.info("Формирование списка возможных вариантов кредитных предложений завершено");
+        log.info("Forming the loan offer list");
 
         Comparator<LoanOfferDTO> rateComparator = Comparator.comparing(LoanOfferDTO::getRate);
         loanOfferDTOList.sort(Collections.reverseOrder(rateComparator));
 
-        log.info("Список возможных вариантов кредитных предложений " + loanOfferDTOList);
+        log.info("Loan offer list ={} ", loanOfferDTOList);
         return loanOfferDTOList;
     }
 
@@ -75,7 +75,7 @@ public class OffersServiceImpl implements OffersService {
         BigDecimal totalAmount = calculateIsInsuranceCaseTotalAmount(loanApplicationRequestDTO.getAmount(),
                 isInsuranceEnabled, loanApplicationRequestDTO.getTerm(), INSURANCE_RATE_IF_IS_INSURANCE_ENABLED_TRUE);
 
-        log.info("Расчет актуального размера тела кредита");
+        log.info("Calculate actual loan body={}", totalAmount);
 
         BigDecimal finalRate = BASE_RATE;
 
@@ -86,7 +86,7 @@ public class OffersServiceImpl implements OffersService {
             finalRate = finalRate.subtract(BigDecimal.valueOf(3));
         }
 
-        log.info("Завершен расчет актуального размера кредитной ставки: " + finalRate + " % ");
+        log.info("Actual rate ={} ", finalRate);
 
         BigDecimal monthlyPayment = calculateMonthlyPayment(loanApplicationRequestDTO.getAmount(),
                 loanApplicationRequestDTO.getTerm(), finalRate);

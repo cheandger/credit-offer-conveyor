@@ -1,7 +1,7 @@
 package org.shrek.services.utils;
 
 import com.shrek.model.*;
-import lombok.RequiredArgsConstructor;
+import lombok.experimental.UtilityClass;
 import org.shrek.mappers.ClientFromFinishRegMapper;
 import org.shrek.mappers.ClientMapper;
 import org.shrek.mappers.CreditMapper;
@@ -24,28 +24,28 @@ import java.util.List;
 
 import static com.shrek.model.ApplicationStatus.*;
 
-@RequiredArgsConstructor
+@UtilityClass
 
-public class DealServiceUtils<PassportMapper> {
+public class DealServiceUtils {
 
     private static final Logger log = LoggerFactory.getLogger(DealServiceImpl.class);
 
 
     public static Application createAndFillTheApplication(LoanApplicationRequestDTO loanApplicationRequestDTO, ClientMapper clientMapper,
-                                                          ApplicationRepository appRepo, ClientRepository clientRepository) {
-        Client client = new Client();
-        client = clientMapper.loanApplicationRequestDtoToClient(loanApplicationRequestDTO);
-        log.info("create Client:  " + client);
+                                                          ClientRepository clientRepository) {
+
+        Client client = clientMapper.loanApplicationRequestDtoToClient(loanApplicationRequestDTO);
+        log.info("creation Client: {} ", client);
         client.setPassport(new PassportInfo()
                 .passportSeries(loanApplicationRequestDTO.getPassportSeries())
                 .passportNumber(loanApplicationRequestDTO.getPassportNumber()));
         log.info("A part of passport data was added to client ");
         clientRepository.save(client);
-        log.info("save Client:  " + client);
+        log.info("save Client: {} ", client);
 
         Application application = new Application();
         application.setClient(client);
-        log.info("create Application:  " + application);
+        log.info("create Application: {} ", application);
         ApplicationStatusHistoryDTO applicationStatusHistoryDTO = new ApplicationStatusHistoryDTO();
         applicationStatusHistoryDTO.status(PREAPPROVAL);
         applicationStatusHistoryDTO.timeStamp(LocalDateTime.now());
@@ -55,8 +55,7 @@ public class DealServiceUtils<PassportMapper> {
         statusHistory.add(applicationStatusHistoryDTO);
         application.setStatus(PREAPPROVAL);
         application.setStatusHistory(statusHistory);
-        appRepo.save(application);
-        log.info("create and Application:  " + application);
+
         return application;
     }
 
@@ -67,27 +66,24 @@ public class DealServiceUtils<PassportMapper> {
         return loanOfferDTOS;
     }
 
-    public static void changeApplicationDeniedStatus(Application application, ApplicationRepository applicationRepository) {
+    public static void changeApplicationDeniedStatus(Application application) {
         ApplicationStatusHistoryDTO applicationDeniedStatusHistoryDTO = new ApplicationStatusHistoryDTO();
-        applicationDeniedStatusHistoryDTO.status(REQUEST_DENIED);
+        applicationDeniedStatusHistoryDTO.status(CLIENT_DENIED);
         applicationDeniedStatusHistoryDTO.timeStamp(LocalDateTime.now());
         applicationDeniedStatusHistoryDTO.changeType(ApplicationStatusHistoryDTO.ChangeTypeEnum.AUTOMATIC);
-        application.setStatus(REQUEST_DENIED);
+        application.setStatus(CLIENT_DENIED);
         List<ApplicationStatusHistoryDTO> deniedStatus = application.getStatusHistory();
         deniedStatus.add(applicationDeniedStatusHistoryDTO);
         application.setStatusHistory(deniedStatus);
-        applicationRepository.save(application);
 
     }
 
-    public static void changeAppStatusToPreapproval(Application application, LoanOfferDTO loanOfferDTO,
-                                                    ApplicationRepository applicationRepository) {
-        application.setStatus(ApplicationStatus.PREAPPROVAL);
-        log.info("The loan status was changed on Preapproval");
+    public static void changeAppStatusToApproval(Application application, LoanOfferDTO loanOfferDTO) {
+        application.setStatus(APPROVED);
 
         List<ApplicationStatusHistoryDTO> history = application.getStatusHistory();
         history.add(new ApplicationStatusHistoryDTO()
-                .status(PREAPPROVAL)
+                .status(APPROVED)
                 .timeStamp(LocalDateTime.now())
                 .changeType(ApplicationStatusHistoryDTO.ChangeTypeEnum.MANUAL));
 
@@ -99,21 +95,19 @@ public class DealServiceUtils<PassportMapper> {
         application.setAppliedOffer(loanOfferDTO);
 
         log.info("The Application was update by new AppliedOffer");
+        log.info("changeAppStatusToApproval(), new status ={}", application.getStatus());
 
-        applicationRepository.save(application);
     }
 
     public static Client settingClient(Application application, FinishRegistrationRequestDTO finishRegistrationRequestDTO,
-                                       ClientFromFinishRegMapper clientFMapper, ClientRepository clientRepository) {
+                                       ClientFromFinishRegMapper clientFromMapper) {
         Client client = application.getClient();
         client.getPassport().setPassportIssueBranch(finishRegistrationRequestDTO.getPassportIssueBranch());
         client.getPassport().setPassportIssueDate(finishRegistrationRequestDTO.getPassportIssueDate());
-        client = clientFMapper.clientFromFinishRegistration(finishRegistrationRequestDTO);
+        client = clientFromMapper.clientFromFinishRegistration(finishRegistrationRequestDTO);
         client.setEmployment(finishRegistrationRequestDTO.getEmployment());
         client.setAccount(finishRegistrationRequestDTO.getAccount());
-        log.info("FullsUp the clients data");
-
-        clientRepository.save(client);
+        log.info("settingClient(), fillsUp the clients data = {}", client);
         return client;
     }
 
@@ -123,10 +117,9 @@ public class DealServiceUtils<PassportMapper> {
         ScoringDataDTO scoringDataDTO = scoringMapper.scoringDataDtoFromClient(client);
         scoringDataDTO.amount(application.getAppliedOffer().getRequestedAmount())
                 .term(application.getAppliedOffer().getTerm())
-                .firstName(client.getFirstName())
                 .isInsuranceEnabled(application.getAppliedOffer().getIsInsuranceEnabled())
                 .isSalaryClient(application.getAppliedOffer().getIsSalaryClient());
-
+        log.info("createScoringDataDTO(), scoringDataDTO ={}", scoringDataDTO);
         return scoringDataDTO;
     }
 
@@ -134,11 +127,11 @@ public class DealServiceUtils<PassportMapper> {
         Credit credit = creditMapper.creditDtoToCredit(creditDTO);
         credit.setCreditStatus(CreditStatus.CALCULATED);
 
-        log.info("calculateCredit(), saved credit={}", creditDTO);
+        log.info("createCredit(), created creditDto={}", creditDTO);
         return credit;
     }
 
-    public static void changeAppStatusToCC_APPROVED(Application application, ApplicationRepository applicationRepository) {
+    public static void changeAppStatusToCCAPPROVED(Application application) {
         List<ApplicationStatusHistoryDTO> history = application.getStatusHistory();
         history.add(new ApplicationStatusHistoryDTO()
                 .status(CC_APPROVED)
@@ -146,14 +139,15 @@ public class DealServiceUtils<PassportMapper> {
                 .changeType(ApplicationStatusHistoryDTO.ChangeTypeEnum.MANUAL));
         application.setStatusHistory(history);
 
-        log.info("The history of loan request is updated");
+
         Long random_number = new SecureRandom().nextLong(100, Long.MAX_VALUE);
         application.setSesCode(random_number);
-        applicationRepository.save(application);
-        log.info("The Application was update and saved");
+
+        log.info("changeAppStatusToCCAPPROVED(), application status={}", application.getStatus());
+
     }
 
-    public static void changeApplicationCC_DeniedStatus(Application application, ApplicationRepository applicationRepository) {
+    public static void changeApplicationCCDeniedStatus(Application application, ApplicationRepository applicationRepository) {
         ApplicationStatusHistoryDTO applicationDeniedStatusHistoryDTO = new ApplicationStatusHistoryDTO();
         applicationDeniedStatusHistoryDTO.status(CC_DENIED);
         applicationDeniedStatusHistoryDTO.timeStamp(LocalDateTime.now());
@@ -163,6 +157,7 @@ public class DealServiceUtils<PassportMapper> {
         deniedStatus.add(applicationDeniedStatusHistoryDTO);
         application.setStatusHistory(deniedStatus);
         applicationRepository.save(application);
+        log.info("changeApplicationCCDeniedStatus(), application status = {}", application.getStatus());
         log.warn("The response was bad, it hasn't body");
     }
 }

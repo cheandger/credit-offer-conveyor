@@ -10,7 +10,7 @@ public interface DealService {
 
     List<LoanOfferDTO> createListOffersByFeignClient(LoanApplicationRequestDTO loanApplicationRequestDTO);
 
-    void getAppChangeStatus(LoanOfferDTO loanOfferDTO);
+    void getAppChangeStatusAfterApplying(LoanOfferDTO loanOfferDTO);
 
     void formScoringData(Long applicationId, FinishRegistrationRequestDTO finishRegistrationRequestDTO);
 }
