@@ -1,0 +1,4 @@
+different:
+  config:
+    BASE_RATE:27.00
+    INSURANCE_RATE_IF_IS_INSURANCE_ENABLED_TRUE:3.00
