@@ -15,15 +15,17 @@ import org.shrek.repository.ApplicationRepository;
 import org.shrek.repository.ClientRepository;
 import org.shrek.repository.CreditRepository;
 import org.shrek.services.DealService;
+import org.shrek.services.DossierService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
+import java.security.SecureRandom;
 import java.util.List;
 
-import static org.shrek.services.utils.DealServiceUtils.*;
+import static org.shrek.utils.DealServiceUtils.*;
 
 
 @Service
@@ -36,7 +38,7 @@ public class DealServiceImpl implements DealService {
     private final ClientMapper clientMapper;
     private final ClientFromFinishRegMapper clientFromFinishRegMapperMapper;
     private final ScoringDataFromClientMapper scoringMapper;
-
+    private final DossierService dossierService;
     private final ApplicationRepository applicationRepository;
     private final ClientRepository clientRepository;
     private final CreditRepository creditRepository;
@@ -59,6 +61,8 @@ public class DealServiceImpl implements DealService {
             return loanOfferDTOS;
         } else {
             changeApplicationDeniedStatus(application);
+            EmailMessageDTO messageAppDeny = prepareMessage(application.getClient().getEmail(), application.getId(), EmailMessageDTO.ThemeEnum.APPLICATION_DENIED);
+            dossierService.sendMessage(messageAppDeny);
 
             log.warn("The response was bad, it hasn't body");
             throw new BusinessException(loanOffersResponse.getStatusCodeValue(), "Your loan request was denied.");
@@ -76,7 +80,18 @@ public class DealServiceImpl implements DealService {
         changeAppStatusToApproval(application, loanOfferDTO);
 
         applicationRepository.save(application);
+
+        EmailMessageDTO messageFinishReg = prepareMessage(application.getClient().getEmail(), application.getId(), EmailMessageDTO.ThemeEnum.FINISH_REGISTRATION);
+
+        log.info("Sending a message to dossier message = {}", messageFinishReg);
+
+        dossierService.sendMessage(messageFinishReg);
+
+        log.info("The message is sent to dossier");
+
+        log.info("applyOffer - end, updatedApplication={}", application);
     }
+
 
     @Override
     public void formScoringData(Long applicationId, FinishRegistrationRequestDTO finishRegistrationRequestDTO) {
@@ -89,12 +104,11 @@ public class DealServiceImpl implements DealService {
         clientRepository.save(client);
         ScoringDataDTO scoringDataDTO = createScoringDataDTO(scoringMapper, client, application);
 
-
         ResponseEntity<CreditDTO> responseCreditDTO = creditConveyorClient.calculate(scoringDataDTO);//POST
 
         if (responseCreditDTO.getStatusCode().is2xxSuccessful()) {
             CreditDTO creditDTO = responseCreditDTO.getBody();
-            log.info("The loan for applicationId {} ", application.getId() + " is calculated: " + creditDTO);
+            log.info("The loan for applicationId {} , \n is calculated: {} ", application.getId(), creditDTO);
 
             Credit credit = createCredit(creditDTO, creditMapper);
 
@@ -102,13 +116,21 @@ public class DealServiceImpl implements DealService {
 
             creditRepository.save(credit);
 
-            changeAppStatusToCCAPPROVED(application);
+            changeAppStatus(application, ApplicationStatus.CC_APPROVED);
+
+            Long random_number = new SecureRandom().nextLong(1000, Long.MAX_VALUE);
+            application.setSesCode(random_number);
 
             applicationRepository.save(application);
             log.info("applicationRepository.save(), application={}", application.getId());
         } else {
             changeApplicationCCDeniedStatus(application, applicationRepository);
+
+            EmailMessageDTO messageAppDeny = prepareMessage(application.getClient().getEmail(), application.getId(), EmailMessageDTO.ThemeEnum.APPLICATION_DENIED);
+            dossierService.sendMessage(messageAppDeny);
+
             applicationRepository.save(application);
+
             log.warn("The response was bad, it hasn't body");
             throw new BusinessException(responseCreditDTO.getStatusCodeValue(), "Your loan request was denied by the Credit Conveyor.");
 

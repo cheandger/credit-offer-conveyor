@@ -1,7 +1,11 @@
 package org.shrek.controllers;
 
 
-/*
+import com.shrek.controller.DealDocumentServiceApi;
+import org.shrek.services.DealDocumentService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
+
 @RestController
 public class DealDocumentController implements DealDocumentServiceApi {
     DealDocumentService dealDocumentService;
@@ -10,14 +14,11 @@ public class DealDocumentController implements DealDocumentServiceApi {
         this.dealDocumentService = dealDocumentService;
     }
 
-    @Override
-    public Optional<NativeWebRequest> getRequest() {
-        return DealDocumentServiceApi.super.getRequest();
-    }
+
 
     @Override
     public ResponseEntity<Void> sendCode(Long applicationId, String body) {
-        return DealDocumentServiceApi.super.sendCode(applicationId, body);
+        return DealDocumentService.(applicationId, body);
     }
 
     @Override
@@ -29,4 +30,4 @@ public class DealDocumentController implements DealDocumentServiceApi {
     public ResponseEntity<Void> signDocuments(Long applicationId) {
         return DealDocumentServiceApi.super.signDocuments(applicationId);
     }
-}*/
+
