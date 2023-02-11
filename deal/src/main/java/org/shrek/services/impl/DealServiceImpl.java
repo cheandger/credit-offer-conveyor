@@ -22,7 +22,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
-import java.security.SecureRandom;
 import java.util.List;
 
 import static org.shrek.utils.DealServiceUtils.*;
@@ -89,7 +88,7 @@ public class DealServiceImpl implements DealService {
 
         log.info("The message is sent to dossier");
 
-        log.info("applyOffer - end, updatedApplication={}", application);
+        log.info("Updated Application={}", application);
     }
 
 
@@ -118,8 +117,8 @@ public class DealServiceImpl implements DealService {
 
             changeAppStatus(application, ApplicationStatus.CC_APPROVED);
 
-            Long random_number = new SecureRandom().nextLong(1000, Long.MAX_VALUE);
-            application.setSesCode(random_number);
+            EmailMessageDTO emailMessageCreateDoc = prepareMessage(application.getClient().getEmail(), application.getId(), EmailMessageDTO.ThemeEnum.CREATE_DOCUMENT);
+            dossierService.sendMessage(emailMessageCreateDoc);//А сюда ли это пихать!?
 
             applicationRepository.save(application);
             log.info("applicationRepository.save(), application={}", application.getId());

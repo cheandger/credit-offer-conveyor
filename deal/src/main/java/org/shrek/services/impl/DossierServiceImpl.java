@@ -56,7 +56,6 @@ public class DossierServiceImpl implements DossierService {
     }
 
 
-    @Override
     public String evaluateTopic(EmailMessageDTO.ThemeEnum theme) {
         String topic = null;
 

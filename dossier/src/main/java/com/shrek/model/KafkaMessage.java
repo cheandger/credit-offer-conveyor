@@ -11,7 +11,7 @@ public class KafkaMessage {
 
     private String address;
 
-    private MessageTheme theme;
+    private EmailMessageDTO.ThemeEnum theme;
 
     private Long applicationId;
 }

@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 
-import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -131,7 +130,7 @@ public class DealServiceUtils {
         return credit;
     }
 
-    public static void changeAppStatus(Application application, ApplicationStatus status) {
+    public void changeAppStatus(Application application, ApplicationStatus status) {
         List<ApplicationStatusHistoryDTO> history = application.getStatusHistory();
         history.add(new ApplicationStatusHistoryDTO()
                 .status(status)
@@ -140,9 +139,6 @@ public class DealServiceUtils {
         application.setStatus(status);
         application.setStatusHistory(history);
 
-
-        Long random_number = new SecureRandom().nextLong(1000, Long.MAX_VALUE);
-        application.setSesCode(random_number);
 
         log.info("changeAppStatusToCCAPPROVED(), application status={}", application.getStatus());
 

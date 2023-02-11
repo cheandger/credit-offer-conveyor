@@ -2,6 +2,7 @@ package org.shrek.services.impl;
 
 
 import com.shrek.model.ApplicationStatus;
+import com.shrek.model.ApplicationStatusHistoryDTO;
 import com.shrek.model.EmailMessageDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,10 +16,11 @@ import org.shrek.services.DealDocumentService;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
+import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
-import static org.shrek.utils.DealServiceUtils.changeAppStatus;
 import static org.shrek.utils.DealServiceUtils.prepareMessage;
 
 
@@ -35,22 +37,6 @@ public class DealDocumentServiceImpl implements DealDocumentService {
     private final CreditRepository creditRepository;
 
 
-    private void createDocumentsRequest(Long applicationId) {
-
-        Application application = applicationRepository.findById(applicationId)
-                .orElseThrow(() -> new EntityNotFoundException("Application not found. id: " + applicationId));
-
-        if (application.getStatus() != ApplicationStatus.CC_APPROVED) {
-            throw new BusinessException(422, "Application, isn't approve by CC_APPROVED status id:  " + application.getId());
-        }
-
-        log.info("Sending create document request for application {}, to email {}",
-                application, application.getClient().getEmail());
-
-        EmailMessageDTO emailMessageCreateDoc = prepareMessage(application.getClient().getEmail(), application.getId(), EmailMessageDTO.ThemeEnum.CREATE_DOCUMENT);
-
-        dossierService.sendMessage(emailMessageCreateDoc);
-    }
 
     @Override
     public void sendDocuments(Long applicationId) {
@@ -60,8 +46,13 @@ public class DealDocumentServiceImpl implements DealDocumentService {
         if (application.getStatus() != ApplicationStatus.CC_APPROVED) {
             throw new BusinessException(422, "Application, isn't approve by CC_APPROVED status id:  " + application.getId());
         }
-
-        changeAppStatus(application, ApplicationStatus.PREPARE_DOCUMENTS);
+        List<ApplicationStatusHistoryDTO> history = application.getStatusHistory();
+        history.add(new ApplicationStatusHistoryDTO()
+                .status(ApplicationStatus.PREPARE_DOCUMENTS)// to exclude static reff's
+                .timeStamp(LocalDateTime.now())
+                .changeType(ApplicationStatusHistoryDTO.ChangeTypeEnum.MANUAL));
+        application.setStatus(ApplicationStatus.PREPARE_DOCUMENTS);
+        application.setStatusHistory(history);
 
         applicationRepository.save(application);
 
@@ -78,41 +69,62 @@ public class DealDocumentServiceImpl implements DealDocumentService {
         Application application = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new EntityNotFoundException("Application not found. id: " + applicationId));
 
-        if (application.getStatus() != ApplicationStatus.DOCUMENT_CREATED) {
+        if (application.getStatus() != ApplicationStatus.PREPARE_DOCUMENTS) {
             throw new BusinessException(422, "Application, isn't approve by DOCUMENT_CREATED status id:  " + application.getId());
         }
+        List<ApplicationStatusHistoryDTO> history = application.getStatusHistory();
+        history.add(new ApplicationStatusHistoryDTO()
+                .status(ApplicationStatus.DOCUMENT_CREATED)// to exclude static reff's
+                .timeStamp(LocalDateTime.now())
+                .changeType(ApplicationStatusHistoryDTO.ChangeTypeEnum.MANUAL));
+        application.setStatus(ApplicationStatus.DOCUMENT_CREATED);
+        application.setStatusHistory(history);
+
+        Long random_number = new SecureRandom().nextLong(1000, Long.MAX_VALUE);
+        application.setSesCode(random_number);
+
+        applicationRepository.save(application);
 
         log.info("Sending sign document request for application {}, to email {}",
                 application, application.getClient().getEmail());
 
         EmailMessageDTO emailMessageCreateDoc = prepareMessage(application.getClient().getEmail(), application.getId(), EmailMessageDTO.ThemeEnum.SEND_SES);
 
-        dossierService.sendMessage(emailMessageCreateDoc);
+        dossierService.sendMessage(emailMessageCreateDoc);//ссылка и код отправляются клиенту.
 
     }
 
     @Override
-    public void sendCode(Long applicationId, Integer sesCode) {
+    public void sendCode(Long applicationId, Long ses) {
         Application application = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new EntityNotFoundException("Application not found. id:" + applicationId));
 
         if (application.getStatus() != ApplicationStatus.DOCUMENT_CREATED) {
             throw new BusinessException(422, "Application, isn't approve by DOCUMENT_CREATED status id:  " + application.getId());
         }
-        Long ses = application.getSesCode();
+
         if (!ses.equals(application.getSesCode())) {
             throw new BusinessException(422, "Application, isn't approve by SesCode  id:  " + application.getId());
         }
 
-        changeAppStatus(application, ApplicationStatus.DOCUMENT_SIGNED);
+        List<ApplicationStatusHistoryDTO> history = application.getStatusHistory();
+        history.add(new ApplicationStatusHistoryDTO()
+                .status(ApplicationStatus.DOCUMENT_SIGNED)// to exclude static reff's
+                .timeStamp(LocalDateTime.now())
+                .changeType(ApplicationStatusHistoryDTO.ChangeTypeEnum.MANUAL));
+        application.setStatus(ApplicationStatus.DOCUMENT_SIGNED);
+        application.setStatusHistory(history);
+
 
         applicationRepository.save(application.setSignDate(LocalDateTime.from(LocalDate.now())));
 
         resolveCredit(applicationId);
+
     }
 
 
-    private void resolveCredit(Long applicationId) {
+    @Override
+    public void resolveCredit(Long applicationId) {
 
         Application application = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new EntityNotFoundException("Application not found. id:" + applicationId));
@@ -121,15 +133,24 @@ public class DealDocumentServiceImpl implements DealDocumentService {
         Credit credit = creditRepository.findById(creditId)
                 .orElseThrow(() -> new EntityNotFoundException("Application not found. id:" + creditId));
 
-        changeAppStatus(application, ApplicationStatus.CREDIT_ISSUED);
+        List<ApplicationStatusHistoryDTO> history = application.getStatusHistory();
+        history.add(new ApplicationStatusHistoryDTO()
+                .status(ApplicationStatus.CREDIT_ISSUED)
+                .timeStamp(LocalDateTime.now())
+                .changeType(ApplicationStatusHistoryDTO.ChangeTypeEnum.MANUAL));
+        application.setStatus(ApplicationStatus.CREDIT_ISSUED);
+        application.setStatusHistory(history);
+
+        EmailMessageDTO mailMessageDTO = new EmailMessageDTO()
+                .address(application.getClient().getEmail())
+                .applicationId(applicationId)
+                .theme(EmailMessageDTO.ThemeEnum.CREDIT_ISSUED);
 
         applicationRepository.save(application);
 
         creditRepository.save(credit.setCreditStatus(CreditStatus.ISSUED));
 
-        EmailMessageDTO emailMessageCreateDoc = prepareMessage(application.getClient().getEmail(), application.getId(), EmailMessageDTO.ThemeEnum.CREDIT_ISSUED);
-
-        dossierService.sendMessage(emailMessageCreateDoc);
+        dossierService.sendMessage(mailMessageDTO);
 
     }
 }
