@@ -3,18 +3,26 @@ package org.shrek.models;
 import com.shrek.model.EmploymentDTO;
 import com.shrek.model.PassportInfo;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
-import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.Objects;
+
 
 @Accessors(chain = true)
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 @Entity(name = "client")
-@Data
-
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 public class Client {
     @Id
@@ -45,6 +53,19 @@ public class Client {
     private EmploymentDTO employment;
     @Column(name = "account")
     private String account;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        Client client = (Client) o;
+        return id != null && Objects.equals(id, client.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }
 
 

@@ -1,6 +1,6 @@
 package org.shrek.controllers;
 
-
+/*
 import com.shrek.controller.DealDocumentServiceApi;
 import org.shrek.services.DealDocumentService;
 import org.springframework.http.ResponseEntity;
@@ -17,16 +17,16 @@ public class DealDocumentController implements DealDocumentServiceApi {
 
     @Override
     public ResponseEntity<Void> sendCode(@RequestParam Long applicationId, Long ses) {
-        return ResponseEntity.ok(DealDocumentService.sendCode(applicationId,ses));
+        return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<Void> sendDocuments(Long applicationId) {
-        return ResponseEntity.ok(DealDocumentService.sendDocuments(applicationId));
+        return ResponseEntity.ok().build();
     }
 
     @Override
     public ResponseEntity<Void> signDocuments(Long applicationId) {
-        return ResponseEntity.ok(DealDocumentService.signDocuments(applicationId));
+        return ResponseEntity.ok().build();
     }
-}
+}*/

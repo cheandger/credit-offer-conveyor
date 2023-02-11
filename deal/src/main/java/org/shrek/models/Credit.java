@@ -2,18 +2,27 @@ package org.shrek.models;
 
 import com.shrek.model.PaymentScheduleElement;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
-import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 @Accessors(chain = true)
 @Entity(name = "credit")
-@Data
+
 
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 public class Credit {
@@ -41,4 +50,17 @@ public class Credit {
     @Column(name = "credit_status")
     @Enumerated(EnumType.STRING)
     private CreditStatus creditStatus;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        Credit credit = (Credit) o;
+        return id != null && Objects.equals(id, credit.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

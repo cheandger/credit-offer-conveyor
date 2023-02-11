@@ -5,18 +5,27 @@ import com.shrek.model.ApplicationStatus;
 import com.shrek.model.ApplicationStatusHistoryDTO;
 import com.shrek.model.LoanOfferDTO;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
-import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
 @Accessors(chain = true)
 @Entity(name = "application")
-@Data
+
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 public class Application {
     @Id
@@ -45,4 +54,16 @@ public class Application {
     @Type(type = "jsonb")
     private List<ApplicationStatusHistoryDTO> statusHistory;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        Application that = (Application) o;
+        return id != null && Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

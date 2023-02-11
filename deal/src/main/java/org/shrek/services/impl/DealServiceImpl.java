@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
 
-import static org.shrek.utils.DealServiceUtils.*;
+import static org.shrek.utils.DealUtils.*;
 
 
 @Service
@@ -32,8 +32,8 @@ import static org.shrek.utils.DealServiceUtils.*;
 public class DealServiceImpl implements DealService {
 
     private static final Logger log = LoggerFactory.getLogger(DealServiceImpl.class);
-    private final CreditMapper creditMapper;
 
+    private final CreditMapper creditMapper;
     private final ClientMapper clientMapper;
     private final ClientFromFinishRegMapper clientFromFinishRegMapperMapper;
     private final ScoringDataFromClientMapper scoringMapper;

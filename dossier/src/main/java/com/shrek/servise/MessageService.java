@@ -1,7 +1,7 @@
 package com.shrek.servise;
 
 
-/*
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -32,87 +32,3 @@ public class MessageService {
     @Value("${custom.message.application-denied.text}")
     private String APPLICATION_DENIED_TEXT;
 
-    private final ObjectMapper objectMapper;
-
-    private final EmailSender emailSender;
-
-    private final DealFeignClient dealFeignClient;
-
-    public MessageFromKafka parseMessageFromJSON(String messageJSON) {
-        try {
-            log.info("MessageService.parseMessageFromKafka() received message \"{}\"", messageJSON);
-            MessageFromKafka messageFromKafka = objectMapper.readValue(messageJSON, MessageFromKafka.class);
-            log.info("MessageService.parseMessageFromKafka() parsed message \"{}\"", messageFromKafka);
-            return messageFromKafka;
-        } catch (JsonProcessingException e) {
-            log.warn("Cannot parse messageJSON \"{}\" to JSON", messageJSON);
-            throw new RuntimeException(e);
-        }
-    }
-
-    public EmailMessage kafkaMessageToEmailMessage(MessageFromKafka fromKafka) {
-        String subject;
-        String text;
-
-        switch (fromKafka.getTheme()) {
-            case FINISH_REGISTRATION: {
-                ApplicationDTO application = dealFeignClient.getApplicationById(fromKafka.getApplicationId());
-                String finishRegistrationTextEvaluated = FINISH_REGISTRATION_TEXT
-                        .replaceAll("\\{applicationId\\}", application.getId().toString());
-                subject = FINISH_REGISTRATION_SUBJECT;
-                text = finishRegistrationTextEvaluated;
-                break;
-            }
-            case CREATE_DOCUMENT: {
-                ApplicationDTO application = dealFeignClient.getApplicationById(fromKafka.getApplicationId());
-                String createDocumentTextEvaluated = CREATE_DOCUMENT_TEXT
-                        .replaceAll("\\{applicationId\\}", application.getId().toString());
-                subject = CREATE_DOCUMENT_SUBJECT;
-                text = createDocumentTextEvaluated;
-                break;
-            }
-            case SEND_DOCUMENT: {
-                ApplicationDTO application = dealFeignClient.getApplicationById(fromKafka.getApplicationId());
-                String sendDocumentTextEvaluated = SEND_DOCUMENT_TEXT.replaceAll("\\{applicationId\\}", application.getId().toString());
-                subject = SEND_DOCUMENT_SUBJECT;
-                text = sendDocumentTextEvaluated;
-                break;
-            }
-            case SEND_SES: {
-                ApplicationDTO application = dealFeignClient.getApplicationById(fromKafka.getApplicationId());
-                String sesCode = application.getSesCode();
-                String sendSesCodeTextEvaluated = SEND_SES_TEXT
-                        .replaceAll("\\{sesCode\\}", sesCode)
-                        .replaceAll("\\{applicationId\\}", application.getId().toString());
-                subject = SEND_SES_SUBJECT;
-                text = sendSesCodeTextEvaluated;
-                break;
-            }
-            case CREDIT_ISSUED: {
-                ApplicationDTO application = dealFeignClient.getApplicationById(fromKafka.getApplicationId());
-                String sendDocumentTextEvaluated = CREDIT_ISSUED_TEXT.replaceAll("\\{applicationId\\}", application.getId().toString());
-                subject = CREDIT_ISSUED_SUBJECT;
-                text = sendDocumentTextEvaluated;
-                break;
-            }
-            case APPLICATION_DENIED: {
-                ApplicationDTO application = dealFeignClient.getApplicationById(fromKafka.getApplicationId());
-                String sendDocumentTextEvaluated = APPLICATION_DENIED_TEXT.replaceAll("\\{applicationId\\}", application.getId().toString());
-                subject = APPLICATION_DENIED_SUBJECT;
-                text = sendDocumentTextEvaluated;
-                break;
-            }
-            default: {
-                log.warn("Incorrect messageType \"{}\"", fromKafka.getTheme());
-                throw new RuntimeException("Incorrect messageType");
-            }
-        }
-
-        return new EmailMessage(fromKafka.getAddress(), subject, text);
-    }
-
-    public void sendMessage(MessageFromKafka messageFromKafka) {
-        log.info("MessageService.sendMessage() send message \"{}\"", messageFromKafka);
-        emailSender.sendMessage(kafkaMessageToEmailMessage(messageFromKafka));
-    }
-}*/

@@ -37,9 +37,9 @@
             <version>2.7.4</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-mail</artifactId>
-            <version>2.7.3</version>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy-dep</artifactId>
+            <version>1.12.20</version>
         </dependency>
 
         <dependency>
@@ -111,6 +111,8 @@
             <artifactId>lombok-mapstruct-binding</artifactId>
             <version>${lombok-mapstruct-binding.version}</version>
         </dependency>
+
+
         <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
@@ -163,3 +165,10 @@
         </plugins>
     </build>
 </project>
+
+
+
+
+
+
+
