@@ -24,7 +24,7 @@ import java.util.List;
 
 import static com.shrek.model.ApplicationStatus.*;
 
-@Component
+
 @UtilityClass
 public class DealUtils {
 
